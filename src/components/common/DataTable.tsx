@@ -1,15 +1,15 @@
-import React from 'react';
-import { ChevronUp, ChevronDown, ArrowUpDown } from 'lucide-react';
-import { EmptyState } from './EmptyState';
-import { TableSkeleton } from './LoadingSkeleton';
-import { cn } from '../../lib/utils';
+import React from "react";
+import { ChevronUp, ChevronDown, ArrowUpDown } from "lucide-react";
+import { EmptyState } from "./EmptyState";
+import { TableSkeleton } from "./LoadingSkeleton";
+import { cn } from "../../lib/utils";
 
 export interface Column<T> {
   key: string;
   header: string;
   render?: (item: T, index: number) => React.ReactNode;
   sortable?: boolean;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
   width?: string;
   className?: string;
 }
@@ -27,7 +27,7 @@ export interface DataTableProps<T> {
   onSelectRow?: (id: string, checked: boolean) => void;
   onSelectAll?: (checked: boolean) => void;
   sortKey?: string;
-  sortDirection?: 'asc' | 'desc';
+  sortDirection?: "asc" | "desc";
   onSort?: (key: string) => void;
   onRowClick?: (item: T) => void;
 }
@@ -37,8 +37,8 @@ export function DataTable<T>({
   data,
   keyExtractor,
   isLoading = false,
-  emptyTitle = 'No records found',
-  emptyDescription = 'Try adjusting your search query or filters to find what you are looking for.',
+  emptyTitle = "No records found",
+  emptyDescription = "Try adjusting your search query or filters to find what you are looking for.",
   emptyActionText,
   onEmptyAction,
   selectedIds,
@@ -70,7 +70,10 @@ export function DataTable<T>({
     );
   }
 
-  const allSelected = selectedIds && data.length > 0 && data.every((item) => selectedIds.includes(keyExtractor(item)));
+  const allSelected =
+    selectedIds &&
+    data.length > 0 &&
+    data.every((item) => selectedIds.includes(keyExtractor(item)));
   const someSelected = selectedIds && selectedIds.length > 0 && !allSelected;
 
   return (
@@ -101,26 +104,29 @@ export function DataTable<T>({
                     key={column.key}
                     style={{ width: column.width }}
                     className={cn(
-                      'px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-dark-muted select-none',
-                      column.align === 'center' && 'text-center',
-                      column.align === 'right' && 'text-right',
-                      column.sortable && 'cursor-pointer hover:text-white transition-colors',
-                      column.className
+                      "px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-dark-muted select-none",
+                      column.align === "center" && "text-center",
+                      column.align === "right" && "text-right",
+                      column.sortable &&
+                        "cursor-pointer hover:text-white transition-colors",
+                      column.className,
                     )}
-                    onClick={() => column.sortable && onSort && onSort(column.key)}
+                    onClick={() =>
+                      column.sortable && onSort && onSort(column.key)
+                    }
                   >
                     <div
                       className={cn(
-                        'flex items-center gap-1.5',
-                        column.align === 'center' && 'justify-center',
-                        column.align === 'right' && 'justify-end'
+                        "flex items-center gap-1.5",
+                        column.align === "center" && "justify-center",
+                        column.align === "right" && "justify-end",
                       )}
                     >
                       <span>{column.header}</span>
                       {column.sortable && (
                         <span className="text-dark-dim">
                           {isSorted ? (
-                            sortDirection === 'asc' ? (
+                            sortDirection === "asc" ? (
                               <ChevronUp className="w-3.5 h-3.5 text-lavender-400" />
                             ) : (
                               <ChevronDown className="w-3.5 h-3.5 text-lavender-400" />
@@ -146,9 +152,11 @@ export function DataTable<T>({
                   key={id}
                   onClick={() => onRowClick && onRowClick(item)}
                   className={cn(
-                    'group transition-colors duration-150',
-                    isSelected ? 'bg-lavender-500/10' : 'hover:bg-background-hover/50',
-                    onRowClick && 'cursor-pointer'
+                    "group transition-colors duration-150",
+                    isSelected
+                      ? "bg-lavender-500/10"
+                      : "hover:bg-background-hover/50",
+                    onRowClick && "cursor-pointer",
                   )}
                 >
                   {/* Row Checkbox */}
@@ -170,17 +178,17 @@ export function DataTable<T>({
                     <td
                       key={column.key}
                       className={cn(
-                        'px-4 py-3.5 text-sm text-white/90',
-                        column.align === 'center' && 'text-center',
-                        column.align === 'right' && 'text-right',
-                        column.className
+                        "px-4 py-3.5 text-sm text-white/90",
+                        column.align === "center" && "text-center",
+                        column.align === "right" && "text-right",
+                        column.className,
                       )}
                     >
                       {column.render
                         ? column.render(item, index)
                         : (item as any)[column.key] !== undefined
-                        ? String((item as any)[column.key])
-                        : '—'}
+                          ? String((item as any)[column.key])
+                          : "—"}
                     </td>
                   ))}
                 </tr>

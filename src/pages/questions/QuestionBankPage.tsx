@@ -1,14 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import {
-  Plus,
-  Edit2,
-  Trash2,
-  Eye,
-  Layers,
-  Link2,
-} from 'lucide-react';
-import { useToast } from '../../contexts/ToastContext';
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Plus, Edit2, Trash2, Eye, Layers, Link2 } from "lucide-react";
+import { useToast } from "../../contexts/ToastContext";
 import {
   Question,
   Chapter,
@@ -17,28 +10,28 @@ import {
   CorrectOption,
   DifficultyLevel,
   QuestionType,
-} from '../../types/database';
-import { questionService } from '../../services/questionService';
-import { chapterService } from '../../services/chapterService';
-import { testService } from '../../services/testService';
-import { DataTable, Column } from '../../components/common/DataTable';
-import { SearchFilterBar } from '../../components/common/SearchFilterBar';
-import { Pagination } from '../../components/common/Pagination';
-import { Modal } from '../../components/common/Modal';
-import { ConfirmDialog } from '../../components/common/ConfirmDialog';
-import { Input } from '../../components/common/Input';
-import { Textarea } from '../../components/common/Textarea';
-import { Select } from '../../components/common/Select';
-import { Switch } from '../../components/common/Switch';
-import { Badge } from '../../components/common/Badge';
-import { Button } from '../../components/common/Button';
-import { QuestionPreviewModal } from './QuestionPreviewModal';
-import { QuestionAssignmentModal } from './QuestionAssignmentModal';
-import { DIFFICULTY_OPTIONS, APP_CONFIG } from '../../constants/config';
+} from "../../types/database";
+import { questionService } from "../../services/questionService";
+import { chapterService } from "../../services/chapterService";
+import { testService } from "../../services/testService";
+import { DataTable, Column } from "../../components/common/DataTable";
+import { SearchFilterBar } from "../../components/common/SearchFilterBar";
+import { Pagination } from "../../components/common/Pagination";
+import { Modal } from "../../components/common/Modal";
+import { ConfirmDialog } from "../../components/common/ConfirmDialog";
+import { Input } from "../../components/common/Input";
+import { Textarea } from "../../components/common/Textarea";
+import { Select } from "../../components/common/Select";
+import { Switch } from "../../components/common/Switch";
+import { Badge } from "../../components/common/Badge";
+import { Button } from "../../components/common/Button";
+import { QuestionPreviewModal } from "./QuestionPreviewModal";
+import { QuestionAssignmentModal } from "./QuestionAssignmentModal";
+import { DIFFICULTY_OPTIONS, APP_CONFIG } from "../../constants/config";
 
 export const QuestionBankPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialTestItemId = searchParams.get('testItemId') || '';
+  const initialTestItemId = searchParams.get("testItemId") || "";
 
   const { success, error: toastError } = useToast();
 
@@ -47,12 +40,12 @@ export const QuestionBankPage: React.FC = () => {
   const [testSeriesItems, setTestSeriesItems] = useState<TestSeriesItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [chapterFilter, setChapterFilter] = useState('');
-  const [difficultyFilter, setDifficultyFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [chapterFilter, setChapterFilter] = useState("");
+  const [difficultyFilter, setDifficultyFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
   const [testItemFilter, setTestItemFilter] = useState(initialTestItemId);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(APP_CONFIG.DEFAULT_PAGE_SIZE);
@@ -66,24 +59,24 @@ export const QuestionBankPage: React.FC = () => {
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
 
   // Form Fields
-  const [chapterId, setChapterId] = useState('');
+  const [chapterId, setChapterId] = useState("");
   const [selectedTestIds, setSelectedTestIds] = useState<string[]>([]);
-  const [questionEn, setQuestionEn] = useState('');
-  const [questionHi, setQuestionHi] = useState('');
-  const [optAEn, setOptAEn] = useState('');
-  const [optAHi, setOptAHi] = useState('');
-  const [optBEn, setOptBEn] = useState('');
-  const [optBHi, setOptBHi] = useState('');
-  const [optCEn, setOptCEn] = useState('');
-  const [optCHi, setOptCHi] = useState('');
-  const [optDEn, setOptDEn] = useState('');
-  const [optDHi, setOptDHi] = useState('');
-  const [correctOption, setCorrectOption] = useState<CorrectOption>('A');
-  const [explanationEn, setExplanationEn] = useState('');
-  const [explanationHi, setExplanationHi] = useState('');
-  const [difficulty, setDifficulty] = useState<DifficultyLevel>('Medium');
-  const [questionType, setQuestionType] = useState<QuestionType>('MCQ');
-  const [source, setSource] = useState('NIELIT 2026');
+  const [questionEn, setQuestionEn] = useState("");
+  const [questionHi, setQuestionHi] = useState("");
+  const [optAEn, setOptAEn] = useState("");
+  const [optAHi, setOptAHi] = useState("");
+  const [optBEn, setOptBEn] = useState("");
+  const [optBHi, setOptBHi] = useState("");
+  const [optCEn, setOptCEn] = useState("");
+  const [optCHi, setOptCHi] = useState("");
+  const [optDEn, setOptDEn] = useState("");
+  const [optDHi, setOptDHi] = useState("");
+  const [correctOption, setCorrectOption] = useState<CorrectOption>("A");
+  const [explanationEn, setExplanationEn] = useState("");
+  const [explanationHi, setExplanationHi] = useState("");
+  const [difficulty, setDifficulty] = useState<DifficultyLevel>("Medium");
+  const [questionType, setQuestionType] = useState<QuestionType>("MCQ");
+  const [source, setSource] = useState("NIELIT 2026");
   const [isActive, setIsActive] = useState(true);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
@@ -102,7 +95,7 @@ export const QuestionBankPage: React.FC = () => {
       setChapters(chaptersData);
       setTestSeriesItems(itemsData);
     } catch (err: any) {
-      toastError('Fetch Error', err.message);
+      toastError("Fetch Error", err.message);
     } finally {
       setLoading(false);
     }
@@ -120,24 +113,24 @@ export const QuestionBankPage: React.FC = () => {
 
   const openCreateModal = () => {
     setEditingQuestion(null);
-    setChapterId('');
+    setChapterId("");
     setSelectedTestIds(testItemFilter ? [testItemFilter] : []);
-    setQuestionEn('');
-    setQuestionHi('');
-    setOptAEn('');
-    setOptAHi('');
-    setOptBEn('');
-    setOptBHi('');
-    setOptCEn('');
-    setOptCHi('');
-    setOptDEn('');
-    setOptDHi('');
-    setCorrectOption('A');
-    setExplanationEn('');
-    setExplanationHi('');
-    setDifficulty('Medium');
-    setQuestionType('MCQ');
-    setSource('NIELIT 2026');
+    setQuestionEn("");
+    setQuestionHi("");
+    setOptAEn("");
+    setOptAHi("");
+    setOptBEn("");
+    setOptBHi("");
+    setOptCEn("");
+    setOptCHi("");
+    setOptDEn("");
+    setOptDHi("");
+    setCorrectOption("A");
+    setExplanationEn("");
+    setExplanationHi("");
+    setDifficulty("Medium");
+    setQuestionType("MCQ");
+    setSource("NIELIT 2026");
     setIsActive(true);
     setFormErrors({});
     setIsFormModalOpen(true);
@@ -145,7 +138,7 @@ export const QuestionBankPage: React.FC = () => {
 
   const openEditModal = (q: Question) => {
     setEditingQuestion(q);
-    setChapterId(q.chapter_id || '');
+    setChapterId(q.chapter_id || "");
     setSelectedTestIds(Array.isArray(q.test_ids) ? q.test_ids : []);
     setQuestionEn(q.question_en);
     setQuestionHi(q.question_hi);
@@ -158,11 +151,11 @@ export const QuestionBankPage: React.FC = () => {
     setOptDEn(q.option_d_en);
     setOptDHi(q.option_d_hi);
     setCorrectOption(q.correct_option);
-    setExplanationEn(q.explanation_en || '');
-    setExplanationHi(q.explanation_hi || '');
+    setExplanationEn(q.explanation_en || "");
+    setExplanationHi(q.explanation_hi || "");
     setDifficulty(q.difficulty);
     setQuestionType(q.question_type);
-    setSource(q.source || '');
+    setSource(q.source || "");
     setIsActive(q.is_active);
     setFormErrors({});
     setIsFormModalOpen(true);
@@ -170,21 +163,23 @@ export const QuestionBankPage: React.FC = () => {
 
   const handleToggleTestItemSelection = (itemId: string) => {
     setSelectedTestIds((prev) =>
-      prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
+      prev.includes(itemId)
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId],
     );
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors: { [key: string]: string } = {};
-    if (!questionEn.trim()) errors.questionEn = 'English question is required.';
-    if (!questionHi.trim()) errors.questionHi = 'Hindi question is required.';
-    if (!optAEn.trim()) errors.optAEn = 'Option A is required.';
-    if (!optBEn.trim()) errors.optBEn = 'Option B is required.';
+    if (!questionEn.trim()) errors.questionEn = "English question is required.";
+    if (!questionHi.trim()) errors.questionHi = "Hindi question is required.";
+    if (!optAEn.trim()) errors.optAEn = "Option A is required.";
+    if (!optBEn.trim()) errors.optBEn = "Option B is required.";
 
-    if (questionType === 'MCQ') {
-      if (!optCEn.trim()) errors.optCEn = 'Option C is required for MCQ.';
-      if (!optDEn.trim()) errors.optDEn = 'Option D is required for MCQ.';
+    if (questionType === "MCQ") {
+      if (!optCEn.trim()) errors.optCEn = "Option C is required for MCQ.";
+      if (!optDEn.trim()) errors.optDEn = "Option D is required for MCQ.";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -202,10 +197,12 @@ export const QuestionBankPage: React.FC = () => {
         option_a_hi: optAHi.trim() || optAEn.trim(),
         option_b_en: optBEn.trim(),
         option_b_hi: optBHi.trim() || optBEn.trim(),
-        option_c_en: questionType === 'True/False' ? '' : optCEn.trim(),
-        option_c_hi: questionType === 'True/False' ? '' : optCHi.trim() || optCEn.trim(),
-        option_d_en: questionType === 'True/False' ? '' : optDEn.trim(),
-        option_d_hi: questionType === 'True/False' ? '' : optDHi.trim() || optDEn.trim(),
+        option_c_en: questionType === "True/False" ? "" : optCEn.trim(),
+        option_c_hi:
+          questionType === "True/False" ? "" : optCHi.trim() || optCEn.trim(),
+        option_d_en: questionType === "True/False" ? "" : optDEn.trim(),
+        option_d_hi:
+          questionType === "True/False" ? "" : optDHi.trim() || optDEn.trim(),
         correct_option: correctOption,
         explanation_en: explanationEn.trim() || null,
         explanation_hi: explanationHi.trim() || null,
@@ -216,19 +213,24 @@ export const QuestionBankPage: React.FC = () => {
       };
 
       if (editingQuestion) {
-        const updated = await questionService.updateQuestion(editingQuestion.id, payload);
-        setQuestions((prev) =>
-          prev.map((q) => (q.id === editingQuestion.id ? { ...q, ...updated } : q))
+        const updated = await questionService.updateQuestion(
+          editingQuestion.id,
+          payload,
         );
-        success('Question Updated', 'Bilingual question changes saved.');
+        setQuestions((prev) =>
+          prev.map((q) =>
+            q.id === editingQuestion.id ? { ...q, ...updated } : q,
+          ),
+        );
+        success("Question Updated", "Bilingual question changes saved.");
       } else {
         const created = await questionService.createQuestion(payload);
         setQuestions((prev) => [created, ...prev]);
-        success('Question Created', 'New bilingual question added to bank.');
+        success("Question Created", "New bilingual question added to bank.");
       }
       setIsFormModalOpen(false);
     } catch (err: any) {
-      toastError('Save Failed', err.message || 'Could not save question.');
+      toastError("Save Failed", err.message || "Could not save question.");
     }
   };
 
@@ -238,10 +240,10 @@ export const QuestionBankPage: React.FC = () => {
     try {
       await questionService.deleteQuestion(deleteTarget.id);
       setQuestions((prev) => prev.filter((q) => q.id !== deleteTarget.id));
-      success('Question Deleted', 'Question removed from question bank.');
+      success("Question Deleted", "Question removed from question bank.");
       setDeleteTarget(null);
     } catch (err: any) {
-      toastError('Delete Failed', err.message || 'Could not delete question.');
+      toastError("Delete Failed", err.message || "Could not delete question.");
     } finally {
       setIsDeleting(false);
     }
@@ -254,18 +256,25 @@ export const QuestionBankPage: React.FC = () => {
       setQuestions((prev) =>
         prev.map((q) =>
           q.id === questionId
-            ? { ...q, test_ids: (q.test_ids || []).filter((id) => id !== testItemFilter) }
-            : q
-        )
+            ? {
+                ...q,
+                test_ids: (q.test_ids || []).filter(
+                  (id) => id !== testItemFilter,
+                ),
+              }
+            : q,
+        ),
       );
-      success('Question Unlinked', 'Removed from current test set.');
+      success("Question Unlinked", "Removed from current test set.");
     } catch (err: any) {
-      toastError('Unlink Failed', err.message);
+      toastError("Unlink Failed", err.message);
     }
   };
 
   const handleSelectRow = (id: string, checked: boolean) => {
-    setSelectedIds((prev) => (checked ? [...prev, id] : prev.filter((i) => i !== id)));
+    setSelectedIds((prev) =>
+      checked ? [...prev, id] : prev.filter((i) => i !== id),
+    );
   };
 
   const handleSelectAll = (checked: boolean) => {
@@ -279,33 +288,50 @@ export const QuestionBankPage: React.FC = () => {
       q.question_hi.toLowerCase().includes(query) ||
       (q.source && q.source.toLowerCase().includes(query));
 
-    const matchChapter = chapterFilter === '' ? true : q.chapter_id === chapterFilter;
-    const matchDifficulty = difficultyFilter === '' ? true : q.difficulty === difficultyFilter;
-    const matchType = typeFilter === '' ? true : q.question_type === typeFilter;
+    const matchChapter =
+      chapterFilter === "" ? true : q.chapter_id === chapterFilter;
+    const matchDifficulty =
+      difficultyFilter === "" ? true : q.difficulty === difficultyFilter;
+    const matchType = typeFilter === "" ? true : q.question_type === typeFilter;
     const matchStatus =
-      statusFilter === '' ? true : statusFilter === 'active' ? q.is_active : !q.is_active;
+      statusFilter === ""
+        ? true
+        : statusFilter === "active"
+          ? q.is_active
+          : !q.is_active;
 
     const matchTest =
-      testItemFilter === '' ? true : Boolean(q.test_ids && q.test_ids.includes(testItemFilter));
+      testItemFilter === ""
+        ? true
+        : Boolean(q.test_ids && q.test_ids.includes(testItemFilter));
 
-    return matchSearch && matchChapter && matchDifficulty && matchType && matchStatus && matchTest;
+    return (
+      matchSearch &&
+      matchChapter &&
+      matchDifficulty &&
+      matchType &&
+      matchStatus &&
+      matchTest
+    );
   });
 
   const totalPages = Math.ceil(filteredQuestions.length / pageSize);
   const paginatedQuestions = filteredQuestions.slice(
     (currentPage - 1) * pageSize,
-    currentPage * pageSize
+    currentPage * pageSize,
   );
 
   const selectedTestItem = testSeriesItems.find((i) => i.id === testItemFilter);
 
   const columns: Column<Question>[] = [
     {
-      key: 'question',
-      header: 'Bilingual Question & Chapter',
+      key: "question",
+      header: "Bilingual Question & Chapter",
       render: (item) => {
         const chapter = chapters.find((c) => c.id === item.chapter_id);
-        const associatedTests = testSeriesItems.filter((t) => item.test_ids?.includes(t.id));
+        const associatedTests = testSeriesItems.filter((t) =>
+          item.test_ids?.includes(t.id),
+        );
 
         return (
           <div className="space-y-1.5 py-1">
@@ -319,20 +345,26 @@ export const QuestionBankPage: React.FC = () => {
             </p>
             <div className="flex flex-wrap items-center gap-2 text-[11px] text-dark-muted pt-0.5">
               <span className="px-2 py-0.5 rounded bg-background-elevated border border-dark-border text-dark-text font-medium">
-                {chapter?.title || 'General / No Chapter'}
+                {chapter?.title || "General / No Chapter"}
               </span>
               <span>•</span>
-              <span className="text-emerald-400 font-bold">Ans: Option {item.correct_option}</span>
+              <span className="text-emerald-400 font-bold">
+                Ans: Option {item.correct_option}
+              </span>
               {item.source && (
                 <>
                   <span>•</span>
-                  <span className="text-dark-dim truncate max-w-xs">{item.source}</span>
+                  <span className="text-dark-dim truncate max-w-xs">
+                    {item.source}
+                  </span>
                 </>
               )}
             </div>
             {associatedTests.length > 0 && (
               <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                <span className="text-[10px] uppercase font-bold text-dark-dim tracking-wider">Test Sets:</span>
+                <span className="text-[10px] uppercase font-bold text-dark-dim tracking-wider">
+                  Test Sets:
+                </span>
                 {associatedTests.map((t) => (
                   <Badge key={t.id} variant="neutral" size="sm">
                     {t.title}
@@ -345,21 +377,23 @@ export const QuestionBankPage: React.FC = () => {
       },
     },
     {
-      key: 'type_diff',
-      header: 'Type & Level',
-      width: '140px',
+      key: "type_diff",
+      header: "Type & Level",
+      width: "140px",
       render: (item) => (
         <div className="space-y-1">
-          <Badge variant="primary" size="sm">{item.question_type}</Badge>
+          <Badge variant="primary" size="sm">
+            {item.question_type}
+          </Badge>
           <div>
             <Badge
               size="sm"
               variant={
-                item.difficulty === 'Easy'
-                  ? 'success'
-                  : item.difficulty === 'Medium'
-                  ? 'warning'
-                  : 'danger'
+                item.difficulty === "Easy"
+                  ? "success"
+                  : item.difficulty === "Medium"
+                    ? "warning"
+                    : "danger"
               }
             >
               {item.difficulty}
@@ -369,12 +403,15 @@ export const QuestionBankPage: React.FC = () => {
       ),
     },
     {
-      key: 'actions',
-      header: 'Actions',
-      width: '130px',
-      align: 'right',
+      key: "actions",
+      header: "Actions",
+      width: "130px",
+      align: "right",
       render: (item) => (
-        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="flex items-center justify-end gap-1"
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             onClick={() => setPreviewQuestion(item)}
             className="p-1.5 text-dark-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors"
@@ -424,10 +461,13 @@ export const QuestionBankPage: React.FC = () => {
                 <span className="text-xs uppercase font-bold text-lavender-400 tracking-wider">
                   Test Set Mode:
                 </span>
-                <span className="font-bold text-white text-sm">{selectedTestItem.title}</span>
+                <span className="font-bold text-white text-sm">
+                  {selectedTestItem.title}
+                </span>
               </div>
               <p className="text-xs text-dark-muted mt-0.5">
-                Showing questions assigned to this set in Supabase • Target: {selectedTestItem.question_count} Qs
+                Showing questions assigned to this set in Supabase • Target:{" "}
+                {selectedTestItem.question_count} Qs
               </p>
             </div>
           </div>
@@ -435,7 +475,7 @@ export const QuestionBankPage: React.FC = () => {
             variant="outline"
             size="sm"
             onClick={() => {
-              setTestItemFilter('');
+              setTestItemFilter("");
               setSearchParams({});
             }}
           >
@@ -450,34 +490,40 @@ export const QuestionBankPage: React.FC = () => {
         searchPlaceholder="Search question text in English or Hindi..."
         filters={[
           {
-            key: 'chapter',
-            label: 'Chapter',
+            key: "chapter",
+            label: "Chapter",
             value: chapterFilter,
             options: chapters.map((c) => ({ value: c.id, label: c.title })),
             onChange: setChapterFilter,
           },
           {
-            key: 'difficulty',
-            label: 'Difficulty',
+            key: "difficulty",
+            label: "Difficulty",
             value: difficultyFilter,
-            options: DIFFICULTY_OPTIONS.map((d) => ({ value: d.value, label: d.label })),
+            options: DIFFICULTY_OPTIONS.map((d) => ({
+              value: d.value,
+              label: d.label,
+            })),
             onChange: setDifficultyFilter,
           },
           {
-            key: 'type',
-            label: 'Type',
+            key: "type",
+            label: "Type",
             value: typeFilter,
             options: [
-              { value: 'MCQ', label: '4-Option MCQ' },
-              { value: 'True/False', label: 'True / False' },
+              { value: "MCQ", label: "4-Option MCQ" },
+              { value: "True/False", label: "True / False" },
             ],
             onChange: setTypeFilter,
           },
           {
-            key: 'test_item',
-            label: 'Test Set',
+            key: "test_item",
+            label: "Test Set",
             value: testItemFilter,
-            options: testSeriesItems.map((i) => ({ value: i.id, label: i.title })),
+            options: testSeriesItems.map((i) => ({
+              value: i.id,
+              label: i.title,
+            })),
             onChange: (val) => {
               setTestItemFilter(val);
               if (val) setSearchParams({ testItemId: val });
@@ -486,14 +532,18 @@ export const QuestionBankPage: React.FC = () => {
           },
         ]}
         hasActiveFilters={Boolean(
-          searchQuery || chapterFilter || difficultyFilter || typeFilter || testItemFilter
+          searchQuery ||
+          chapterFilter ||
+          difficultyFilter ||
+          typeFilter ||
+          testItemFilter,
         )}
         onClearFilters={() => {
-          setSearchQuery('');
-          setChapterFilter('');
-          setDifficultyFilter('');
-          setTypeFilter('');
-          setTestItemFilter('');
+          setSearchQuery("");
+          setChapterFilter("");
+          setDifficultyFilter("");
+          setTypeFilter("");
+          setTestItemFilter("");
           setSearchParams({});
         }}
         extraActions={
@@ -508,7 +558,7 @@ export const QuestionBankPage: React.FC = () => {
           )
         }
         actionButton={{
-          label: 'New Question',
+          label: "New Question",
           onClick: openCreateModal,
         }}
       />
@@ -541,7 +591,11 @@ export const QuestionBankPage: React.FC = () => {
         isOpen={isFormModalOpen}
         onClose={() => setIsFormModalOpen(false)}
         size="2xl"
-        title={editingQuestion ? 'Edit Bilingual Question' : 'Add New Bilingual Question'}
+        title={
+          editingQuestion
+            ? "Edit Bilingual Question"
+            : "Add New Bilingual Question"
+        }
         subtitle="Provide complete English and Hindi text in Supabase"
         footer={
           <>
@@ -549,7 +603,7 @@ export const QuestionBankPage: React.FC = () => {
               Cancel
             </Button>
             <Button onClick={handleSave}>
-              {editingQuestion ? 'Save Changes' : 'Save Question'}
+              {editingQuestion ? "Save Changes" : "Save Question"}
             </Button>
           </>
         }
@@ -563,14 +617,17 @@ export const QuestionBankPage: React.FC = () => {
                   Associate with Test Series Items / Test Sets
                 </span>
                 <p className="text-xs text-dark-muted mt-0.5">
-                  Select which test sets include this question ({selectedTestIds.length} selected)
+                  Select which test sets include this question (
+                  {selectedTestIds.length} selected)
                 </p>
               </div>
               {testSeriesItems.length > 0 && (
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setSelectedTestIds(testSeriesItems.map((t) => t.id))}
+                    onClick={() =>
+                      setSelectedTestIds(testSeriesItems.map((t) => t.id))
+                    }
                     className="text-xs text-lavender-400 hover:text-lavender-300 underline"
                   >
                     Select All
@@ -589,7 +646,8 @@ export const QuestionBankPage: React.FC = () => {
 
             {testSeriesItems.length === 0 ? (
               <p className="text-xs text-dark-dim italic">
-                No test series items created yet. You can create them in the Test Series section.
+                No test series items created yet. You can create them in the
+                Test Series section.
               </p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
@@ -602,8 +660,8 @@ export const QuestionBankPage: React.FC = () => {
                       onClick={() => handleToggleTestItemSelection(item.id)}
                       className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-left text-xs transition-all ${
                         isSelected
-                          ? 'bg-lavender-500/15 border-lavender-500/50 text-white shadow-sm'
-                          : 'bg-background-subtle/50 border-dark-border text-dark-muted hover:border-dark-border/80 hover:text-dark-text'
+                          ? "bg-lavender-500/15 border-lavender-500/50 text-white shadow-sm"
+                          : "bg-background-subtle/50 border-dark-border text-dark-muted hover:border-dark-border/80 hover:text-dark-text"
                       }`}
                     >
                       <input
@@ -613,9 +671,13 @@ export const QuestionBankPage: React.FC = () => {
                         className="mt-0.5 w-3.5 h-3.5 rounded text-lavender-500 cursor-pointer pointer-events-none"
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-white truncate">{item.title}</div>
+                        <div className="font-semibold text-white truncate">
+                          {item.title}
+                        </div>
                         <div className="text-[10px] text-dark-dim flex items-center gap-1.5 mt-0.5">
-                          <span className="px-1.5 py-0.2 bg-dark-bg/60 rounded">{item.test_type}</span>
+                          <span className="px-1.5 py-0.2 bg-dark-bg/60 rounded">
+                            {item.test_type}
+                          </span>
                           <span>•</span>
                           <span>{item.question_count} Qs Target</span>
                         </div>
@@ -634,7 +696,7 @@ export const QuestionBankPage: React.FC = () => {
                 value={chapterId}
                 onChange={(e) => setChapterId(e.target.value)}
                 options={[
-                  { value: '', label: '-- General / No Specific Chapter --' },
+                  { value: "", label: "-- General / No Specific Chapter --" },
                   ...chapters.map((c) => ({ value: c.id, label: c.title })),
                 ]}
                 error={formErrors.chapterId}
@@ -646,16 +708,16 @@ export const QuestionBankPage: React.FC = () => {
               onChange={(e) => {
                 const newType = e.target.value as QuestionType;
                 setQuestionType(newType);
-                if (newType === 'True/False') {
-                  setOptAEn('True');
-                  setOptAHi('सही (True)');
-                  setOptBEn('False');
-                  setOptBHi('गलत (False)');
+                if (newType === "True/False") {
+                  setOptAEn("True");
+                  setOptAHi("सही (True)");
+                  setOptBEn("False");
+                  setOptBHi("गलत (False)");
                 }
               }}
               options={[
-                { value: 'MCQ', label: '4-Option MCQ' },
-                { value: 'True/False', label: 'True / False' },
+                { value: "MCQ", label: "4-Option MCQ" },
+                { value: "True/False", label: "True / False" },
               ]}
             />
             <Select
@@ -692,15 +754,17 @@ export const QuestionBankPage: React.FC = () => {
               <span className="text-xs font-bold uppercase tracking-wider text-dark-muted">
                 Bilingual Options & Correct Answer
               </span>
-              <span className="text-xs text-lavender-400">Select the correct radio option</span>
+              <span className="text-xs text-lavender-400">
+                Select the correct radio option
+              </span>
             </div>
 
             <div className="flex items-center gap-3">
               <input
                 type="radio"
                 name="correct_option"
-                checked={correctOption === 'A'}
-                onChange={() => setCorrectOption('A')}
+                checked={correctOption === "A"}
+                onChange={() => setCorrectOption("A")}
                 className="w-4 h-4 text-emerald-500 cursor-pointer"
               />
               <span className="text-xs font-bold text-white w-6">A:</span>
@@ -723,8 +787,8 @@ export const QuestionBankPage: React.FC = () => {
               <input
                 type="radio"
                 name="correct_option"
-                checked={correctOption === 'B'}
-                onChange={() => setCorrectOption('B')}
+                checked={correctOption === "B"}
+                onChange={() => setCorrectOption("B")}
                 className="w-4 h-4 text-emerald-500 cursor-pointer"
               />
               <span className="text-xs font-bold text-white w-6">B:</span>
@@ -743,14 +807,14 @@ export const QuestionBankPage: React.FC = () => {
               </div>
             </div>
 
-            {questionType === 'MCQ' && (
+            {questionType === "MCQ" && (
               <>
                 <div className="flex items-center gap-3">
                   <input
                     type="radio"
                     name="correct_option"
-                    checked={correctOption === 'C'}
-                    onChange={() => setCorrectOption('C')}
+                    checked={correctOption === "C"}
+                    onChange={() => setCorrectOption("C")}
                     className="w-4 h-4 text-emerald-500 cursor-pointer"
                   />
                   <span className="text-xs font-bold text-white w-6">C:</span>
@@ -773,8 +837,8 @@ export const QuestionBankPage: React.FC = () => {
                   <input
                     type="radio"
                     name="correct_option"
-                    checked={correctOption === 'D'}
-                    onChange={() => setCorrectOption('D')}
+                    checked={correctOption === "D"}
+                    onChange={() => setCorrectOption("D")}
                     className="w-4 h-4 text-emerald-500 cursor-pointer"
                   />
                   <span className="text-xs font-bold text-white w-6">D:</span>

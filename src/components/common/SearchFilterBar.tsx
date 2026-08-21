@@ -1,11 +1,17 @@
-import React from 'react';
-import { Search, X, Plus } from 'lucide-react';
-import { Button } from './Button';
+import React from "react";
+import { Search, X, Plus } from "lucide-react";
+import { Button } from "./Button";
 
 export interface FilterOption {
   key: string;
   label: string;
-  options: readonly { readonly value: string | number; readonly label: string; [key: string]: any }[] | { value: string | number; label: string; [key: string]: any }[];
+  options:
+    | readonly {
+        readonly value: string | number;
+        readonly label: string;
+        [key: string]: any;
+      }[]
+    | { value: string | number; label: string; [key: string]: any }[];
   value: string;
   onChange: (value: string) => void;
 }
@@ -28,7 +34,7 @@ export interface SearchFilterBarProps {
 export const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
   searchQuery,
   onSearchChange,
-  searchPlaceholder = 'Search records...',
+  searchPlaceholder = "Search records...",
   filters = [],
   onClearFilters,
   hasActiveFilters = false,
@@ -51,7 +57,7 @@ export const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
           />
           {searchQuery && (
             <button
-              onClick={() => onSearchChange('')}
+              onClick={() => onSearchChange("")}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-dark-dim hover:text-white p-0.5 rounded"
             >
               <X className="w-3.5 h-3.5" />
@@ -71,7 +77,11 @@ export const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
                 All {filter.label}
               </option>
               {filter.options.map((opt) => (
-                <option key={String(opt.value)} value={String(opt.value)} className="bg-background-card text-white">
+                <option
+                  key={String(opt.value)}
+                  value={String(opt.value)}
+                  className="bg-background-card text-white"
+                >
                   {opt.label}
                 </option>
               ))}

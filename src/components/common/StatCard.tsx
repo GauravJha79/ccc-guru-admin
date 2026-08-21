@@ -1,6 +1,6 @@
-import React from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import React from "react";
+import { TrendingUp, TrendingDown } from "lucide-react";
+import { cn } from "../../lib/utils";
 
 export interface StatCardProps {
   title: string;
@@ -21,22 +21,22 @@ export const StatCard: React.FC<StatCardProps> = ({
   subtitle,
   icon,
   trend,
-  accentColor = 'from-lavender-500/20 to-purple-600/10',
+  accentColor = "from-lavender-500/20 to-purple-600/10",
   onClick,
 }) => {
   return (
     <div
       onClick={onClick}
       className={cn(
-        'relative p-5 rounded-2xl bg-background-card border border-dark-border overflow-hidden transition-all duration-200 glass-card-hover group',
-        onClick && 'cursor-pointer'
+        "relative p-5 rounded-2xl bg-background-card border border-dark-border overflow-hidden transition-all duration-200 glass-card-hover group",
+        onClick && "cursor-pointer",
       )}
     >
       {/* Background Gradient Glow */}
       <div
         className={cn(
-          'absolute -right-6 -top-6 w-24 h-24 rounded-full bg-gradient-to-br opacity-20 blur-xl group-hover:opacity-40 transition-opacity',
-          accentColor
+          "absolute -right-6 -top-6 w-24 h-24 rounded-full bg-gradient-to-br opacity-20 blur-xl group-hover:opacity-40 transition-opacity",
+          accentColor,
         )}
       />
 
@@ -45,7 +45,9 @@ export const StatCard: React.FC<StatCardProps> = ({
           <p className="text-xs font-semibold uppercase tracking-wider text-dark-muted mb-1">
             {title}
           </p>
-          <h3 className="text-2xl font-extrabold text-white tracking-tight">{value}</h3>
+          <h3 className="text-2xl font-extrabold text-white tracking-tight">
+            {value}
+          </h3>
           {subtitle && <p className="text-xs text-dark-dim mt-1">{subtitle}</p>}
         </div>
 

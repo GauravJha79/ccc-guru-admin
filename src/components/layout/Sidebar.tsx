@@ -1,5 +1,5 @@
-import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import React from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   FolderTree,
@@ -16,11 +16,11 @@ import {
   LogOut,
   Sparkles,
   ChevronRight,
-} from 'lucide-react';
-import { ROUTES } from '../../constants/routes';
-import { useAuth } from '../../contexts/AuthContext';
-import { Badge } from '../common/Badge';
-import { cn } from '../../lib/utils';
+} from "lucide-react";
+import { ROUTES } from "../../constants/routes";
+import { useAuth } from "../../contexts/AuthContext";
+import { Badge } from "../common/Badge";
+import { cn } from "../../lib/utils";
 
 export interface NavSection {
   title: string;
@@ -33,55 +33,122 @@ export interface NavSection {
   }[];
 }
 
-export const Sidebar: React.FC<{ onCloseMobile?: () => void }> = ({ onCloseMobile }) => {
+export const Sidebar: React.FC<{ onCloseMobile?: () => void }> = ({
+  onCloseMobile,
+}) => {
   const { user, logout, isSuperAdmin } = useAuth();
   const location = useLocation();
 
   const navSections: NavSection[] = [
     {
-      title: 'Overview',
+      title: "Overview",
       items: [
-        { label: 'Dashboard', path: ROUTES.DASHBOARD, icon: <LayoutDashboard className="w-4 h-4" /> },
+        {
+          label: "Dashboard",
+          path: ROUTES.DASHBOARD,
+          icon: <LayoutDashboard className="w-4 h-4" />,
+        },
       ],
     },
     {
-      title: 'Test Management',
+      title: "Test Management",
       items: [
-        { label: 'Test Categories', path: ROUTES.TEST_CATEGORIES, icon: <FolderTree className="w-4 h-4" /> },
-        { label: 'Test Series', path: ROUTES.TEST_SERIES, icon: <Layers className="w-4 h-4" /> },
-        { label: 'Test Series Items', path: ROUTES.TEST_SERIES_ITEMS, icon: <FileText className="w-4 h-4" /> },
+        {
+          label: "Test Categories",
+          path: ROUTES.TEST_CATEGORIES,
+          icon: <FolderTree className="w-4 h-4" />,
+        },
+        {
+          label: "Test Series",
+          path: ROUTES.TEST_SERIES,
+          icon: <Layers className="w-4 h-4" />,
+        },
+        {
+          label: "Test Series Items",
+          path: ROUTES.TEST_SERIES_ITEMS,
+          icon: <FileText className="w-4 h-4" />,
+        },
       ],
     },
     {
-      title: 'Question Bank',
+      title: "Question Bank",
       items: [
-        { label: 'Chapters', path: ROUTES.CHAPTERS, icon: <BookOpen className="w-4 h-4" /> },
-        { label: 'Questions & Sets', path: ROUTES.QUESTIONS, icon: <FileQuestion className="w-4 h-4" /> },
+        {
+          label: "Chapters",
+          path: ROUTES.CHAPTERS,
+          icon: <BookOpen className="w-4 h-4" />,
+        },
+        {
+          label: "Questions & Sets",
+          path: ROUTES.QUESTIONS,
+          icon: <FileQuestion className="w-4 h-4" />,
+        },
       ],
     },
     {
-      title: 'Content Library',
+      title: "Content Library",
       items: [
-        { label: 'PDF Notes Categories', path: ROUTES.NOTE_CATEGORIES, icon: <FolderTree className="w-4 h-4" /> },
-        { label: 'PDF Notes', path: ROUTES.NOTES, icon: <FileText className="w-4 h-4" /> },
-        { label: 'Blog Categories', path: ROUTES.BLOG_CATEGORIES, icon: <FolderTree className="w-4 h-4" /> },
-        { label: 'Blogs & Articles', path: ROUTES.BLOGS, icon: <Newspaper className="w-4 h-4" /> },
+        {
+          label: "PDF Notes Categories",
+          path: ROUTES.NOTE_CATEGORIES,
+          icon: <FolderTree className="w-4 h-4" />,
+        },
+        {
+          label: "PDF Notes",
+          path: ROUTES.NOTES,
+          icon: <FileText className="w-4 h-4" />,
+        },
+        {
+          label: "Blog Categories",
+          path: ROUTES.BLOG_CATEGORIES,
+          icon: <FolderTree className="w-4 h-4" />,
+        },
+        {
+          label: "Blogs & Articles",
+          path: ROUTES.BLOGS,
+          icon: <Newspaper className="w-4 h-4" />,
+        },
       ],
     },
     {
-      title: 'Books & Affiliate',
+      title: "Books & Affiliate",
       items: [
-        { label: 'Book Categories', path: ROUTES.BOOK_CATEGORIES, icon: <FolderTree className="w-4 h-4" /> },
-        { label: 'Books & Links', path: ROUTES.BOOKS, icon: <BookMarked className="w-4 h-4" /> },
+        {
+          label: "Book Categories",
+          path: ROUTES.BOOK_CATEGORIES,
+          icon: <FolderTree className="w-4 h-4" />,
+        },
+        {
+          label: "Books & Links",
+          path: ROUTES.BOOKS,
+          icon: <BookMarked className="w-4 h-4" />,
+        },
       ],
     },
     {
-      title: 'Users & System',
+      title: "Users & System",
       items: [
-        { label: 'Enrollments', path: ROUTES.ENROLLMENTS, icon: <Users className="w-4 h-4" /> },
-        { label: 'Admin Team', path: ROUTES.ADMIN_USERS, icon: <Shield className="w-4 h-4" />, superAdminOnly: true },
-        { label: 'Database Schema & Setup', path: ROUTES.DATABASE_SETUP, icon: <Database className="w-4 h-4" /> },
-        { label: 'My Profile', path: ROUTES.PROFILE, icon: <Settings className="w-4 h-4" /> },
+        {
+          label: "Enrollments",
+          path: ROUTES.ENROLLMENTS,
+          icon: <Users className="w-4 h-4" />,
+        },
+        {
+          label: "Admin Team",
+          path: ROUTES.ADMIN_USERS,
+          icon: <Shield className="w-4 h-4" />,
+          superAdminOnly: true,
+        },
+        {
+          label: "Database Schema & Setup",
+          path: ROUTES.DATABASE_SETUP,
+          icon: <Database className="w-4 h-4" />,
+        },
+        {
+          label: "My Profile",
+          path: ROUTES.PROFILE,
+          icon: <Settings className="w-4 h-4" />,
+        },
       ],
     },
   ];
@@ -97,9 +164,14 @@ export const Sidebar: React.FC<{ onCloseMobile?: () => void }> = ({ onCloseMobil
             </div>
             <div>
               <h1 className="font-extrabold text-base tracking-tight text-white flex items-center gap-1.5">
-                CCC Prep <span className="text-[10px] text-lavender-300 font-bold px-1.5 py-0.5 bg-lavender-500/20 rounded-md">ADMIN</span>
+                CCC Prep{" "}
+                <span className="text-[10px] text-lavender-300 font-bold px-1.5 py-0.5 bg-lavender-500/20 rounded-md">
+                  ADMIN
+                </span>
               </h1>
-              <p className="text-[11px] text-dark-muted font-medium">Management Console</p>
+              <p className="text-[11px] text-dark-muted font-medium">
+                Management Console
+              </p>
             </div>
           </div>
         </div>
@@ -131,26 +203,28 @@ export const Sidebar: React.FC<{ onCloseMobile?: () => void }> = ({ onCloseMobil
                     to={item.path}
                     onClick={onCloseMobile}
                     className={cn(
-                      'flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group',
+                      "flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group",
                       isActive
-                        ? 'bg-gradient-to-r from-lavender-600/30 to-lavender-500/10 text-white font-semibold border border-lavender-500/40 shadow-glow-sm'
-                        : 'text-dark-muted hover:text-white hover:bg-white/5'
+                        ? "bg-gradient-to-r from-lavender-600/30 to-lavender-500/10 text-white font-semibold border border-lavender-500/40 shadow-glow-sm"
+                        : "text-dark-muted hover:text-white hover:bg-white/5",
                     )}
                   >
                     <div className="flex items-center gap-2.5">
                       <span
                         className={cn(
-                          'p-1.5 rounded-lg transition-colors',
+                          "p-1.5 rounded-lg transition-colors",
                           isActive
-                            ? 'bg-lavender-500 text-white shadow-sm'
-                            : 'text-dark-muted group-hover:text-lavender-400 group-hover:bg-white/5'
+                            ? "bg-lavender-500 text-white shadow-sm"
+                            : "text-dark-muted group-hover:text-lavender-400 group-hover:bg-white/5",
                         )}
                       >
                         {item.icon}
                       </span>
                       <span>{item.label}</span>
                     </div>
-                    {isActive && <ChevronRight className="w-3.5 h-3.5 text-lavender-400" />}
+                    {isActive && (
+                      <ChevronRight className="w-3.5 h-3.5 text-lavender-400" />
+                    )}
                   </NavLink>
                 );
               })}
@@ -164,12 +238,14 @@ export const Sidebar: React.FC<{ onCloseMobile?: () => void }> = ({ onCloseMobil
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-lavender-600/30 text-lavender-300 font-bold border border-lavender-500/40 flex items-center justify-center text-sm shadow-sm flex-shrink-0">
-              {user?.name ? user.name[0].toUpperCase() : 'A'}
+              {user?.name ? user.name[0].toUpperCase() : "A"}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-white truncate">{user?.name || 'Admin User'}</p>
+              <p className="text-xs font-bold text-white truncate">
+                {user?.name || "Admin User"}
+              </p>
               <p className="text-[10px] text-lavender-400 capitalize truncate font-medium">
-                {user?.role?.replace('_', ' ') || 'Super Admin'}
+                {user?.role?.replace("_", " ") || "Super Admin"}
               </p>
             </div>
           </div>

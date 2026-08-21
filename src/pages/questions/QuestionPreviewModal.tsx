@@ -1,9 +1,9 @@
-import React from 'react';
-import { CheckCircle2, BookOpen } from 'lucide-react';
-import { Question, Chapter } from '../../types/database';
-import { Modal } from '../../components/common/Modal';
-import { Badge } from '../../components/common/Badge';
-import { Button } from '../../components/common/Button';
+import React from "react";
+import { CheckCircle2, BookOpen } from "lucide-react";
+import { Question, Chapter } from "../../types/database";
+import { Modal } from "../../components/common/Modal";
+import { Badge } from "../../components/common/Badge";
+import { Button } from "../../components/common/Button";
 
 export interface QuestionPreviewModalProps {
   question: Question | null;
@@ -22,10 +22,10 @@ export const QuestionPreviewModal: React.FC<QuestionPreviewModalProps> = ({
 
   const chapter = chapters.find((c) => c.id === question.chapter_id);
   const options = [
-    { key: 'A', en: question.option_a_en, hi: question.option_a_hi },
-    { key: 'B', en: question.option_b_en, hi: question.option_b_hi },
-    { key: 'C', en: question.option_c_en, hi: question.option_c_hi },
-    { key: 'D', en: question.option_d_en, hi: question.option_d_hi },
+    { key: "A", en: question.option_a_en, hi: question.option_a_hi },
+    { key: "B", en: question.option_b_en, hi: question.option_b_hi },
+    { key: "C", en: question.option_c_en, hi: question.option_c_hi },
+    { key: "D", en: question.option_d_en, hi: question.option_d_hi },
   ];
 
   return (
@@ -34,7 +34,7 @@ export const QuestionPreviewModal: React.FC<QuestionPreviewModalProps> = ({
       onClose={onClose}
       size="lg"
       title="Question Bilingual Preview"
-      subtitle={`Source: ${question.source || 'Standard Bank'} • Difficulty: ${question.difficulty}`}
+      subtitle={`Source: ${question.source || "Standard Bank"} • Difficulty: ${question.difficulty}`}
       footer={
         <Button variant="secondary" onClick={onClose}>
           Close Preview
@@ -46,11 +46,11 @@ export const QuestionPreviewModal: React.FC<QuestionPreviewModalProps> = ({
           <Badge variant="primary">{question.question_type}</Badge>
           <Badge
             variant={
-              question.difficulty === 'Easy'
-                ? 'success'
-                : question.difficulty === 'Medium'
-                ? 'warning'
-                : 'danger'
+              question.difficulty === "Easy"
+                ? "success"
+                : question.difficulty === "Medium"
+                  ? "warning"
+                  : "danger"
             }
           >
             {question.difficulty}
@@ -89,7 +89,10 @@ export const QuestionPreviewModal: React.FC<QuestionPreviewModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {options.map((opt) => {
               const isCorrect = question.correct_option === opt.key;
-              if (question.question_type === 'True/False' && (opt.key === 'C' || opt.key === 'D')) {
+              if (
+                question.question_type === "True/False" &&
+                (opt.key === "C" || opt.key === "D")
+              ) {
                 return null;
               }
 
@@ -98,30 +101,36 @@ export const QuestionPreviewModal: React.FC<QuestionPreviewModalProps> = ({
                   key={opt.key}
                   className={`p-3 rounded-xl border flex items-start gap-3 transition-all ${
                     isCorrect
-                      ? 'bg-emerald-500/10 border-emerald-500/40 shadow-[0_0_15px_-3px_rgba(16,185,129,0.25)]'
-                      : 'bg-background-elevated/40 border-dark-border'
+                      ? "bg-emerald-500/10 border-emerald-500/40 shadow-[0_0_15px_-3px_rgba(16,185,129,0.25)]"
+                      : "bg-background-elevated/40 border-dark-border"
                   }`}
                 >
                   <div
                     className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 ${
                       isCorrect
-                        ? 'bg-emerald-500 text-white shadow-sm'
-                        : 'bg-background-hover text-dark-muted'
+                        ? "bg-emerald-500 text-white shadow-sm"
+                        : "bg-background-hover text-dark-muted"
                     }`}
                   >
                     {opt.key}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-xs font-semibold ${isCorrect ? 'text-emerald-200' : 'text-white'}`}>
+                    <p
+                      className={`text-xs font-semibold ${isCorrect ? "text-emerald-200" : "text-white"}`}
+                    >
                       {opt.en}
                     </p>
                     {opt.hi && opt.hi !== opt.en && (
-                      <p className={`text-[11px] mt-0.5 ${isCorrect ? 'text-emerald-300' : 'text-dark-muted'}`}>
+                      <p
+                        className={`text-[11px] mt-0.5 ${isCorrect ? "text-emerald-300" : "text-dark-muted"}`}
+                      >
                         {opt.hi}
                       </p>
                     )}
                   </div>
-                  {isCorrect && <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />}
+                  {isCorrect && (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  )}
                 </div>
               );
             })}

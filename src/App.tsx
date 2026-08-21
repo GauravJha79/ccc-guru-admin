@@ -1,8 +1,8 @@
-import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import { ToastProvider } from './contexts/ToastContext';
-import { AuthProvider } from './contexts/AuthContext';
-import { AppRoutes } from './routes/AppRoutes';
+import React from "react";
+import { BrowserRouter } from "react-router-dom";
+import { ToastProvider } from "./contexts/ToastContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import { AppRoutes } from "./routes/AppRoutes";
 
 export function App() {
   return (

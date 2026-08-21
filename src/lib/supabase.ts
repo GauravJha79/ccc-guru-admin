@@ -20,6 +20,18 @@ export const supabase = isSupabaseConfigured
     })
   : null;
 
+// Isolated auth client to register users without disturbing current session
+export const createIsolatedAuthClient = () => {
+  if (!isSupabaseConfigured) return null;
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  });
+};
+
 export async function testSupabaseConnection(): Promise<{ success: boolean; message: string }> {
   if (!isSupabaseConfigured || !supabase) {
     return {

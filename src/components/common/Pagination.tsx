@@ -1,6 +1,11 @@
-import React from 'react';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import { APP_CONFIG } from '../../constants/config';
+import React from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
+import { APP_CONFIG } from "../../constants/config";
 
 export interface PaginationProps {
   currentPage: number;
@@ -29,9 +34,11 @@ export const Pagination: React.FC<PaginationProps> = ({
       {/* Counts & Size selection */}
       <div className="flex items-center gap-4 text-xs text-dark-muted">
         <span>
-          Showing <strong className="text-white font-semibold">{startItem}</strong> to{' '}
-          <strong className="text-white font-semibold">{endItem}</strong> of{' '}
-          <strong className="text-white font-semibold">{totalItems}</strong> entries
+          Showing{" "}
+          <strong className="text-white font-semibold">{startItem}</strong> to{" "}
+          <strong className="text-white font-semibold">{endItem}</strong> of{" "}
+          <strong className="text-white font-semibold">{totalItems}</strong>{" "}
+          entries
         </span>
 
         {onPageSizeChange && (
