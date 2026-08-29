@@ -75,7 +75,10 @@ export const testService = {
   // Test Series Items (Sets)
   async getSeriesItems(): Promise<TestSeriesItem[]> {
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('test_series_items').select('*, series:test_series(*)').order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('test_series_items')
+        .select('*, series:test_series(*)')
+        .order('sort_order', { ascending: true });
       if (error) throw error;
       return data || [];
     }

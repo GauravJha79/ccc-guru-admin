@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Plus, Edit2, Trash2, Eye, Layers, Link2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Eye, Layers, Link2, Upload } from "lucide-react";
 import { useToast } from "../../contexts/ToastContext";
 import {
   Question,
@@ -27,6 +27,7 @@ import { Badge } from "../../components/common/Badge";
 import { Button } from "../../components/common/Button";
 import { QuestionPreviewModal } from "./QuestionPreviewModal";
 import { QuestionAssignmentModal } from "./QuestionAssignmentModal";
+import { BulkQuestionUploadModal } from "./BulkQuestionUploadModal";
 import { DIFFICULTY_OPTIONS, APP_CONFIG } from "../../constants/config";
 
 export const QuestionBankPage: React.FC = () => {
@@ -53,6 +54,7 @@ export const QuestionBankPage: React.FC = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [previewQuestion, setPreviewQuestion] = useState<Question | null>(null);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
 
   // Form Modal state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -547,15 +549,24 @@ export const QuestionBankPage: React.FC = () => {
           setSearchParams({});
         }}
         extraActions={
-          selectedIds.length > 0 && (
+          <div className="flex items-center gap-2">
             <Button
-              variant="secondary"
-              onClick={() => setIsAssignModalOpen(true)}
-              leftIcon={<Link2 className="w-4 h-4 text-lavender-400" />}
+              variant="outline"
+              onClick={() => setIsBulkUploadModalOpen(true)}
+              leftIcon={<Upload className="w-4 h-4 text-lavender-400" />}
             >
-              Assign Selected ({selectedIds.length})
+              Bulk Upload
             </Button>
-          )
+            {selectedIds.length > 0 && (
+              <Button
+                variant="secondary"
+                onClick={() => setIsAssignModalOpen(true)}
+                leftIcon={<Link2 className="w-4 h-4 text-lavender-400" />}
+              >
+                Assign Selected ({selectedIds.length})
+              </Button>
+            )}
+          </div>
         }
         actionButton={{
           label: "New Question",
@@ -910,6 +921,17 @@ export const QuestionBankPage: React.FC = () => {
         testSeriesItems={testSeriesItems}
         onComplete={() => {
           setSelectedIds([]);
+          fetchData();
+        }}
+      />
+
+      <BulkQuestionUploadModal
+        isOpen={isBulkUploadModalOpen}
+        onClose={() => setIsBulkUploadModalOpen(false)}
+        chapters={chapters}
+        testSeriesItems={testSeriesItems}
+        defaultTestItemId={testItemFilter}
+        onSuccess={() => {
           fetchData();
         }}
       />

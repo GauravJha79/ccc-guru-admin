@@ -47,6 +47,7 @@ export const TestSeriesItemsPage: React.FC = () => {
   const [totalMarks, setTotalMarks] = useState(100);
   const [negativeMarkingEnabled, setNegativeMarkingEnabled] = useState(false);
   const [negativeMarks, setNegativeMarks] = useState(0.25);
+  const [sortOrder, setSortOrder] = useState(1);
   const [isPublished, setIsPublished] = useState(true);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
@@ -74,8 +75,9 @@ export const TestSeriesItemsPage: React.FC = () => {
   }, []);
 
   const openCreateModal = () => {
+    const defaultSeriesId = seriesFilter || testSeries[0]?.id || '';
     setEditingItem(null);
-    setSeriesId(testSeries[0]?.id || '');
+    setSeriesId(defaultSeriesId);
     setTitle('');
     setTestType('Mock');
     setQuestionCount(100);
@@ -84,6 +86,7 @@ export const TestSeriesItemsPage: React.FC = () => {
     setTotalMarks(100);
     setNegativeMarkingEnabled(false);
     setNegativeMarks(0.25);
+    setSortOrder(testSeriesItems.length + 1);
     setIsPublished(true);
     setFormErrors({});
     setIsModalOpen(true);
@@ -100,6 +103,7 @@ export const TestSeriesItemsPage: React.FC = () => {
     setTotalMarks(item.total_marks);
     setNegativeMarkingEnabled(item.negative_marking_enabled ?? item.negative_marking ?? false);
     setNegativeMarks(item.negative_marks);
+    setSortOrder(item.sort_order ?? 1);
     setIsPublished(item.is_published);
     setFormErrors({});
     setIsModalOpen(true);
@@ -130,7 +134,7 @@ export const TestSeriesItemsPage: React.FC = () => {
         negative_marking_enabled: negativeMarkingEnabled,
         negative_marks: negativeMarkingEnabled ? Number(negativeMarks) : 0,
         is_published: isPublished,
-        sort_order: editingItem?.sort_order ?? 0,
+        sort_order: Number(sortOrder),
       };
 
       if (editingItem) {
@@ -141,7 +145,7 @@ export const TestSeriesItemsPage: React.FC = () => {
         success('Test Set Updated', `Saved "${title}"`);
       } else {
         const created = await testService.createSeriesItem(payload);
-        setTestSeriesItems((prev) => [created, ...prev]);
+        setTestSeriesItems((prev) => [...prev, created]);
         success('Test Set Created', `Created "${title}"`);
       }
       setIsModalOpen(false);
@@ -178,16 +182,18 @@ export const TestSeriesItemsPage: React.FC = () => {
     }
   };
 
-  const filteredItems = testSeriesItems.filter((item) => {
-    const matchSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchSeries = seriesFilter === '' ? true : item.series_id === seriesFilter;
-    const matchDifficulty = difficultyFilter === '' ? true : item.difficulty === difficultyFilter;
-    const matchType = typeFilter === '' ? true : item.test_type === typeFilter;
-    const matchStatus =
-      statusFilter === '' ? true : statusFilter === 'published' ? item.is_published : !item.is_published;
+  const filteredItems = testSeriesItems
+    .filter((item) => {
+      const matchSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchSeries = seriesFilter === '' ? true : item.series_id === seriesFilter;
+      const matchDifficulty = difficultyFilter === '' ? true : item.difficulty === difficultyFilter;
+      const matchType = typeFilter === '' ? true : item.test_type === typeFilter;
+      const matchStatus =
+        statusFilter === '' ? true : statusFilter === 'published' ? item.is_published : !item.is_published;
 
-    return matchSearch && matchSeries && matchDifficulty && matchType && matchStatus;
-  });
+      return matchSearch && matchSeries && matchDifficulty && matchType && matchStatus;
+    })
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
   const totalPages = Math.ceil(filteredItems.length / pageSize);
   const paginatedItems = filteredItems.slice(
@@ -196,6 +202,17 @@ export const TestSeriesItemsPage: React.FC = () => {
   );
 
   const columns: Column<TestSeriesItem>[] = [
+    {
+      key: 'sort_order',
+      header: 'Order',
+      width: '80px',
+      align: 'center',
+      render: (item) => (
+        <span className="font-mono text-xs text-lavender-300 font-bold px-2 py-1 bg-lavender-500/10 rounded-lg">
+          #{item.sort_order ?? 0}
+        </span>
+      ),
+    },
     {
       key: 'title',
       header: 'Test Set / Title',
@@ -450,7 +467,7 @@ export const TestSeriesItemsPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Input
               label="Duration (Minutes)"
               type="number"
@@ -467,6 +484,15 @@ export const TestSeriesItemsPage: React.FC = () => {
               min={1}
               value={totalMarks}
               onChange={(e) => setTotalMarks(Number(e.target.value))}
+              required
+            />
+
+            <Input
+              label="Sort Order"
+              type="number"
+              min={0}
+              value={sortOrder}
+              onChange={(e) => setSortOrder(Number(e.target.value))}
               required
             />
           </div>

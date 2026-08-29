@@ -59,6 +59,61 @@ export const questionService = {
     } as Question;
   },
 
+  async createQuestionsBulk(
+    questionsList: Array<Omit<Question, 'id' | 'created_at' | 'chapter'>>
+  ): Promise<Question[]> {
+    const cleanPayloads = questionsList.map((payload) => ({
+      chapter_id: payload.chapter_id || null,
+      question_en: payload.question_en.trim(),
+      question_hi: (payload.question_hi || payload.question_en).trim(),
+      option_a_en: payload.option_a_en.trim(),
+      option_a_hi: (payload.option_a_hi || payload.option_a_en).trim(),
+      option_b_en: payload.option_b_en.trim(),
+      option_b_hi: (payload.option_b_hi || payload.option_b_en).trim(),
+      option_c_en: payload.question_type === 'True/False' ? '' : (payload.option_c_en || '').trim(),
+      option_c_hi: payload.question_type === 'True/False' ? '' : (payload.option_c_hi || payload.option_c_en || '').trim(),
+      option_d_en: payload.question_type === 'True/False' ? '' : (payload.option_d_en || '').trim(),
+      option_d_hi: payload.question_type === 'True/False' ? '' : (payload.option_d_hi || payload.option_d_en || '').trim(),
+      correct_option: payload.correct_option,
+      explanation_en: payload.explanation_en ? payload.explanation_en.trim() : null,
+      explanation_hi: payload.explanation_hi ? payload.explanation_hi.trim() : null,
+      difficulty: payload.difficulty || 'Medium',
+      question_type: payload.question_type || 'MCQ',
+      source: payload.source ? payload.source.trim() : null,
+      is_active: payload.is_active !== undefined ? payload.is_active : true,
+      test_ids: Array.isArray(payload.test_ids) ? payload.test_ids : [],
+    }));
+
+    if (isSupabaseConfigured && supabase) {
+      const BATCH_SIZE = 50;
+      const createdQuestions: Question[] = [];
+
+      for (let i = 0; i < cleanPayloads.length; i += BATCH_SIZE) {
+        const batch = cleanPayloads.slice(i, i + BATCH_SIZE);
+        const { data, error } = await supabase
+          .from('questions')
+          .insert(batch)
+          .select('*, chapter:chapters(*)');
+        if (error) throw error;
+        if (data) {
+          createdQuestions.push(
+            ...data.map((q: any) => ({
+              ...q,
+              test_ids: Array.isArray(q.test_ids) ? q.test_ids : [],
+            }))
+          );
+        }
+      }
+      return createdQuestions;
+    }
+
+    return cleanPayloads.map((payload, index) => ({
+      ...payload,
+      id: `q-bulk-${Date.now()}-${index}`,
+      created_at: new Date().toISOString(),
+    })) as Question[];
+  },
+
   async updateQuestion(id: string, updates: Partial<Question>): Promise<Question> {
     const cleanUpdates = {
       ...updates,
