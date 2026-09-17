@@ -5,6 +5,10 @@ import {
   Trash2,
   FileText,
   ExternalLink,
+  Upload,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  X,
 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { Note, NoteCategory } from '../../types/database';
@@ -49,7 +53,9 @@ export const NotesPage: React.FC = () => {
   const [description, setDescription] = useState('');
   const [hindiDescription, setHindiDescription] = useState('');
   const [pdfUrl, setPdfUrl] = useState('');
+  const [pdfInputMode, setPdfInputMode] = useState<'upload' | 'url'>('upload');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [thumbnailInputMode, setThumbnailInputMode] = useState<'upload' | 'url'>('upload');
   const [fileName, setFileName] = useState('');
   const [fileSize, setFileSize] = useState(0);
   const [pageCount, setPageCount] = useState(1);
@@ -430,35 +436,233 @@ export const NotesPage: React.FC = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <FileUpload
-                bucket={APP_CONFIG.STORAGE_BUCKETS.NOTES_PDF}
-                type="pdf"
-                accept="application/pdf"
-                label="PDF Document *"
-                value={pdfUrl}
-                currentFileName={fileName}
-                onChange={(url, meta) => {
-                  setPdfUrl(url);
-                  if (meta) {
-                    setFileName(meta.fileName);
-                    setFileSize(meta.fileSize);
-                  }
-                }}
-                helperText={formErrors.pdfUrl ? formErrors.pdfUrl : 'Upload the study PDF file to Supabase Storage.'}
-              />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* 1. PDF Document Section */}
+            <div className="space-y-3 p-4 rounded-2xl bg-background-elevated/40 border border-dark-border">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-lavender-400" />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-white">
+                    PDF Document *
+                  </span>
+                </div>
+
+                {/* Mode Selector */}
+                <div className="flex items-center bg-background rounded-lg p-0.5 border border-dark-border text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setPdfInputMode('upload')}
+                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                      pdfInputMode === 'upload'
+                        ? 'bg-lavender-500 text-white font-medium shadow-sm'
+                        : 'text-dark-muted hover:text-white'
+                    }`}
+                  >
+                    <Upload className="w-3 h-3" />
+                    <span>Upload PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPdfInputMode('url')}
+                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                      pdfInputMode === 'url'
+                        ? 'bg-lavender-500 text-white font-medium shadow-sm'
+                        : 'text-dark-muted hover:text-white'
+                    }`}
+                  >
+                    <LinkIcon className="w-3 h-3" />
+                    <span>Paste PDF URL</span>
+                  </button>
+                </div>
+              </div>
+
+              {pdfInputMode === 'upload' && (
+                <FileUpload
+                  bucket={APP_CONFIG.STORAGE_BUCKETS.NOTES_PDF}
+                  type="pdf"
+                  accept="application/pdf"
+                  value={pdfUrl}
+                  currentFileName={fileName}
+                  onChange={(url, meta) => {
+                    setPdfUrl(url);
+                    if (meta) {
+                      setFileName(meta.fileName);
+                      setFileSize(meta.fileSize);
+                    }
+                  }}
+                  helperText={formErrors.pdfUrl ? formErrors.pdfUrl : 'Upload study PDF to Supabase Storage.'}
+                />
+              )}
+
+              {pdfInputMode === 'url' && (
+                <div className="space-y-3">
+                  <Input
+                    placeholder="Paste direct PDF URL (e.g. https://.../file.pdf or Cloud Drive link)"
+                    value={pdfUrl}
+                    onChange={(e) => {
+                      const url = e.target.value.trim();
+                      setPdfUrl(url);
+                      if (url && !fileName) {
+                        try {
+                          const urlParts = new URL(url).pathname.split('/');
+                          const lastPart = urlParts[urlParts.length - 1];
+                          if (lastPart) setFileName(decodeURIComponent(lastPart));
+                        } catch {
+                          setFileName('study-notes.pdf');
+                        }
+                      }
+                    }}
+                    error={formErrors.pdfUrl}
+                  />
+
+                  {pdfUrl && (
+                    <div className="p-3 rounded-xl bg-background border border-dark-border/80 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="p-2 rounded-lg bg-lavender-500/10 text-lavender-400 border border-lavender-500/20 shrink-0">
+                          <FileText className="w-4 h-4" />
+                        </div>
+                        <div className="space-y-0.5 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-white truncate">
+                              {fileName || 'External PDF Document'}
+                            </span>
+                            <Badge variant="success" size="sm">
+                              Active Link
+                            </Badge>
+                          </div>
+                          <p className="text-[11px] text-dark-muted font-mono truncate">{pdfUrl}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <a
+                          href={pdfUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-1.5 rounded-lg text-dark-muted hover:text-white hover:bg-dark-border/50 transition-colors"
+                          title="Open PDF Link"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setPdfUrl('');
+                            setFileName('');
+                          }}
+                          className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 p-1.5 h-auto"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            <div>
-              <FileUpload
-                bucket={APP_CONFIG.STORAGE_BUCKETS.NOTES_THUMBNAILS}
-                type="image"
-                accept="image/*"
-                label="Cover Thumbnail (Optional)"
-                value={thumbnailUrl}
-                onChange={(url) => setThumbnailUrl(url)}
-                helperText="Optional image preview shown on the mobile screen."
-              />
+
+            {/* 2. Cover Thumbnail Section */}
+            <div className="space-y-3 p-4 rounded-2xl bg-background-elevated/40 border border-dark-border">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-pink-400" />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-white">
+                    Cover Thumbnail
+                  </span>
+                  <span className="text-[10px] text-dark-muted font-normal">(Optional)</span>
+                </div>
+
+                {/* Mode Selector */}
+                <div className="flex items-center bg-background rounded-lg p-0.5 border border-dark-border text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setThumbnailInputMode('upload')}
+                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                      thumbnailInputMode === 'upload'
+                        ? 'bg-lavender-500 text-white font-medium shadow-sm'
+                        : 'text-dark-muted hover:text-white'
+                    }`}
+                  >
+                    <Upload className="w-3 h-3" />
+                    <span>Upload Image</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setThumbnailInputMode('url')}
+                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                      thumbnailInputMode === 'url'
+                        ? 'bg-lavender-500 text-white font-medium shadow-sm'
+                        : 'text-dark-muted hover:text-white'
+                    }`}
+                  >
+                    <LinkIcon className="w-3 h-3" />
+                    <span>Paste Image URL</span>
+                  </button>
+                </div>
+              </div>
+
+              {thumbnailInputMode === 'upload' && (
+                <FileUpload
+                  bucket={APP_CONFIG.STORAGE_BUCKETS.NOTES_THUMBNAILS}
+                  type="image"
+                  accept="image/*"
+                  value={thumbnailUrl}
+                  onChange={(url) => setThumbnailUrl(url)}
+                  helperText="Upload image preview to Supabase Storage."
+                />
+              )}
+
+              {thumbnailInputMode === 'url' && (
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Paste direct thumbnail URL (e.g. https://.../cover.jpg)"
+                      value={thumbnailUrl}
+                      onChange={(e) => setThumbnailUrl(e.target.value.trim())}
+                      className="flex-1"
+                    />
+                    {thumbnailUrl && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setThumbnailUrl('')}
+                        className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 shrink-0"
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+
+                  {thumbnailUrl && (
+                    <div className="p-2.5 rounded-xl bg-background border border-dark-border/80 flex items-center gap-3">
+                      <div className="w-20 h-14 rounded-lg overflow-hidden border border-dark-border bg-dark-bg shrink-0">
+                        <img
+                          src={thumbnailUrl}
+                          alt="Thumbnail Preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%23f43f5e" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-white">External Cover Linked</span>
+                          <Badge variant="success" size="sm">
+                            Active URL
+                          </Badge>
+                        </div>
+                        <p className="text-[11px] text-dark-muted font-mono truncate">{thumbnailUrl}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

@@ -65,12 +65,12 @@ export const Modal: React.FC<ModalProps> = ({
         {title && (
           <div className="flex items-center justify-between px-6 py-4 border-b border-dark-border/80 bg-background-elevated/40">
             <div>
-              <h3 className="text-lg font-bold text-white">{title}</h3>
+              <h3 className="text-lg font-bold text-dark-text">{title}</h3>
               {subtitle && <p className="text-xs text-dark-muted mt-0.5">{subtitle}</p>}
             </div>
             <button
               onClick={onClose}
-              className="text-dark-muted hover:text-white p-2 rounded-xl hover:bg-white/5 transition-colors"
+              className="text-dark-muted hover:text-dark-text p-2 rounded-xl hover:bg-background-hover transition-colors"
             >
               <X className="w-5 h-5" />
             </button>

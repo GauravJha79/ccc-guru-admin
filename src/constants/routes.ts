@@ -32,6 +32,12 @@ export const ROUTES = {
   BOOK_CATEGORIES: '/books/categories',
   BOOKS: '/books',
 
+  // Courses
+  COURSES: '/courses',
+  COURSE_BUILDER: '/courses/:id/builder',
+  COURSE_ENROLLMENTS: '/courses/enrollments',
+  COURSE_PAYMENTS: '/courses/payments',
+
   // Enrollments
   ENROLLMENTS: '/enrollments',
 
@@ -40,3 +46,4 @@ export const ROUTES = {
   ADMIN_USERS: '/settings/admins',
   DATABASE_SETUP: '/settings/database',
 } as const;
+

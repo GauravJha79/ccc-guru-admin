@@ -85,10 +85,34 @@ export const testService = {
     return [];
   },
 
+  async syncSeriesSetsCount(seriesId: string): Promise<number> {
+    if (!isSupabaseConfigured || !supabase || !seriesId) return 0;
+    try {
+      const { count, error } = await supabase
+        .from('test_series_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('series_id', seriesId);
+
+      if (!error && count !== null) {
+        await supabase
+          .from('test_series')
+          .update({ total_sets_available: count })
+          .eq('id', seriesId);
+        return count;
+      }
+    } catch (e) {
+      console.warn('Failed to sync total_sets_available:', e);
+    }
+    return 0;
+  },
+
   async createSeriesItem(payload: Omit<TestSeriesItem, 'id' | 'created_at' | 'updated_at' | 'negative_marking' | 'series' | 'assigned_questions_count'>): Promise<TestSeriesItem> {
     if (isSupabaseConfigured && supabase) {
       const { data, error } = await supabase.from('test_series_items').insert(payload).select('*, series:test_series(*)').single();
       if (error) throw error;
+      if (payload.series_id) {
+        await this.syncSeriesSetsCount(payload.series_id);
+      }
       return data;
     }
     return { ...payload, id: `item-${Date.now()}`, created_at: new Date().toISOString() } as TestSeriesItem;
@@ -96,8 +120,22 @@ export const testService = {
 
   async updateSeriesItem(id: string, updates: Partial<TestSeriesItem>): Promise<TestSeriesItem> {
     if (isSupabaseConfigured && supabase) {
+      // If series_id is changing, get the old series_id to sync both
+      let oldSeriesId: string | null = null;
+      if (updates.series_id) {
+        const { data: current } = await supabase.from('test_series_items').select('series_id').eq('id', id).single();
+        oldSeriesId = current?.series_id || null;
+      }
+
       const { data, error } = await supabase.from('test_series_items').update(updates).eq('id', id).select('*, series:test_series(*)').single();
       if (error) throw error;
+
+      if (updates.series_id) {
+        await this.syncSeriesSetsCount(updates.series_id);
+        if (oldSeriesId && oldSeriesId !== updates.series_id) {
+          await this.syncSeriesSetsCount(oldSeriesId);
+        }
+      }
       return data;
     }
     return { id, ...updates } as TestSeriesItem;
@@ -105,8 +143,12 @@ export const testService = {
 
   async deleteSeriesItem(id: string): Promise<void> {
     if (isSupabaseConfigured && supabase) {
+      const { data: item } = await supabase.from('test_series_items').select('series_id').eq('id', id).single();
       const { error } = await supabase.from('test_series_items').delete().eq('id', id);
       if (error) throw error;
+      if (item?.series_id) {
+        await this.syncSeriesSetsCount(item.series_id);
+      }
     }
   },
 };

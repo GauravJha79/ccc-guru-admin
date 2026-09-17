@@ -53,12 +53,12 @@ export const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full bg-background-elevated/70 border border-dark-border rounded-xl pl-9.5 pr-8 py-2 text-xs md:text-sm text-white placeholder:text-dark-dim focus:outline-none focus:border-lavender-500 focus:ring-1 focus:ring-lavender-500 transition-colors"
+            className="w-full bg-background-elevated/70 border border-dark-border rounded-xl pl-9.5 pr-8 py-2 text-xs md:text-sm text-dark-text placeholder:text-dark-dim focus:outline-none focus:border-lavender-500 focus:ring-1 focus:ring-lavender-500 transition-colors"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-dark-dim hover:text-white p-0.5 rounded"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-dark-dim hover:text-dark-text p-0.5 rounded"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -71,7 +71,7 @@ export const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
             <select
               value={filter.value}
               onChange={(e) => filter.onChange(e.target.value)}
-              className="w-full bg-background-elevated/70 border border-dark-border rounded-xl px-3 py-2 text-xs md:text-sm text-white focus:outline-none focus:border-lavender-500 transition-colors cursor-pointer"
+              className="w-full bg-background-elevated/70 border border-dark-border rounded-xl px-3 py-2 text-xs md:text-sm text-dark-text focus:outline-none focus:border-lavender-500 transition-colors cursor-pointer"
             >
               <option value="" className="bg-background-card text-dark-muted">
                 All {filter.label}
@@ -80,7 +80,7 @@ export const SearchFilterBar: React.FC<SearchFilterBarProps> = ({
                 <option
                   key={String(opt.value)}
                   value={String(opt.value)}
-                  className="bg-background-card text-white"
+                  className="bg-background-card text-dark-text"
                 >
                   {opt.label}
                 </option>

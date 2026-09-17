@@ -87,7 +87,27 @@ const INITIAL_TEST_SERIES: TestSeries[] = [
     id: 'tser-1',
     category_id: 'tcat-1',
     title: 'CCC 2026 Ultimate Test Series',
+    slug: 'ccc-2026-ultimate-test-series',
     description: '10 Full-length mock tests based on latest NIELIT CCC exam syllabus with detailed bilingual solutions.',
+    description_md: `# CCC 2026 Ultimate Test Series Overview
+
+Prepare and pass your NIELIT CCC (Course on Computer Concepts) online examination on the first attempt with our high-yield mock test series.
+
+## Key Features & Highlights
+- **10 Full-Length Mock Exams**: Exact 100 questions per test following latest 90-minute examination pattern.
+- **Bilingual Coverage**: Complete English & Hindi question explanations.
+- **LibreOffice Deep Dive**: High-weightage coverage of Writer, Calc, and Impress.
+- **Detailed Analytics**: Immediate score breakdown and performance insights.
+
+## NIELIT CCC Exam Structure
+| Section / Module | Questions | Marks |
+| :--- | :--- | :--- |
+| Introduction to Computer & GUI | 15 | 15 |
+| LibreOffice (Writer, Calc, Impress) | 40 | 40 |
+| Internet, WWW, Email & Social Media | 25 | 25 |
+| Digital Financial Services & Cyber Security | 20 | 20 |
+
+> **Passing Criteria**: Score a minimum of 50% marks to qualify for NIELIT CCC Grade certification.`,
     is_featured: true,
     featured_tag: 'MOST POPULAR',
     featured_short_desc: 'Complete 1000+ question exam simulation with timer.',
@@ -104,7 +124,17 @@ const INITIAL_TEST_SERIES: TestSeries[] = [
     id: 'tser-2',
     category_id: 'tcat-2',
     title: 'LibreOffice & OS Mastery Series',
+    slug: 'libreoffice-os-mastery-series',
     description: 'Focused test sets covering LibreOffice Writer, Calc, Impress and Operating System fundamentals.',
+    description_md: `# LibreOffice & Operating Systems Mastery
+
+Master the most scored topics in the CCC examination with targeted chapter-wise quizzes.
+
+## Modules Covered
+- **LibreOffice Writer**: Document formatting, mail merge, tables, and shortcuts.
+- **LibreOffice Calc**: Formulas (SUM, AVERAGE, IF), charts, and cell references.
+- **LibreOffice Impress**: Slides, animations, transitions, and master slides.
+- **Operating Systems**: Windows & Linux desktop management, CLI basics, file systems.`,
     is_featured: true,
     featured_tag: 'TOP RATED',
     featured_short_desc: 'Master the high-weightage LibreOffice modules.',
@@ -121,7 +151,11 @@ const INITIAL_TEST_SERIES: TestSeries[] = [
     id: 'tser-3',
     category_id: 'tcat-3',
     title: 'CCC 2024-2025 Solved Papers',
+    slug: 'ccc-2024-2025-solved-papers',
     description: 'Original previous cycle NIELIT exam questions with verified answer keys.',
+    description_md: `# CCC Previous Years Solved Papers (2024–2025)
+
+Practice with authentic past exam questions with verified answer keys and detailed explanations.`,
     is_featured: false,
     total_sets_available: 5,
     total_enrolled: 620,

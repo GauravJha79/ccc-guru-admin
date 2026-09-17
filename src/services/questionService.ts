@@ -144,6 +144,19 @@ export const questionService = {
     }
   },
 
+  async deleteQuestionsBulk(ids: string[]): Promise<void> {
+    if (ids.length === 0) return;
+    if (isSupabaseConfigured && supabase) {
+      // In batches of 100 to stay well under query params limits
+      const BATCH_SIZE = 100;
+      for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+        const batch = ids.slice(i, i + BATCH_SIZE);
+        const { error } = await supabase.from('questions').delete().in('id', batch);
+        if (error) throw error;
+      }
+    }
+  },
+
   // Test Question Assignments (using test_ids array on questions table)
   async assignQuestionsToTest(testItemId: string, questionIds: string[]): Promise<void> {
     if (isSupabaseConfigured && supabase) {

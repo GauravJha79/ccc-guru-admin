@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Edit2, Trash2, Users, FileText } from "lucide-react";
+import { Plus, Edit2, Trash2, Users, FileText, Sparkles, BookOpen } from "lucide-react";
 import { useToast } from "../../contexts/ToastContext";
 import { TestSeries, TestCategory } from "../../types/database";
 import { testService } from "../../services/testService";
@@ -14,7 +14,8 @@ import { Select } from "../../components/common/Select";
 import { Switch } from "../../components/common/Switch";
 import { Badge } from "../../components/common/Badge";
 import { Button } from "../../components/common/Button";
-import { formatDate, formatCurrency } from "../../lib/utils";
+import { RichTextEditor } from "../../components/common/RichTextEditor";
+import { formatDate, formatCurrency, generateSlug } from "../../lib/utils";
 import { APP_CONFIG } from "../../constants/config";
 
 export const TestSeriesPage: React.FC = () => {
@@ -37,7 +38,9 @@ export const TestSeriesPage: React.FC = () => {
   // Form State
   const [categoryId, setCategoryId] = useState("");
   const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
+  const [descriptionMd, setDescriptionMd] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
   const [featuredTag, setFeaturedTag] = useState("");
   const [featuredShortDesc, setFeaturedShortDesc] = useState("");
@@ -71,11 +74,58 @@ export const TestSeriesPage: React.FC = () => {
     fetchData();
   }, []);
 
+  const handleTitleChange = (val: string) => {
+    setTitle(val);
+    if (!editingSeries) {
+      setSlug(generateSlug(val));
+    }
+  };
+
+  const handleInsertSeoTemplate = () => {
+    const currentTitle = title.trim() || "CCC 2026 Test Series";
+    const template = `# ${currentTitle} — Complete Preparation Guide & Syllabus
+
+Pass the NIELIT CCC (Course on Computer Concepts) examination on your first try with our expertly crafted online test series.
+
+## 🎯 Key Highlights & Features
+- **Comprehensive Coverage**: 100% aligned with the latest NIELIT CCC examination syllabus.
+- **Bilingual Practice**: Full questions and step-by-step explanations in both English & Hindi.
+- **Real Exam Interface**: Practice with accurate 90-minute timer and examination simulations.
+- **Instant Result & In-Depth Analysis**: Detailed scorecards identifying your strong and weak topics.
+
+## 📊 Module & Topic-wise Syllabus Breakdown
+| Module | Topic Coverage | Questions | Weightage |
+| :--- | :--- | :--- | :--- |
+| **Module 1** | Introduction to Computer, GUI, Windows & Linux Desktop | 15 | 15% |
+| **Module 2** | LibreOffice Writer (Word Processing & Mail Merge) | 20 | 20% |
+| **Module 3** | LibreOffice Calc (Spreadsheet formulas & Functions) | 15 | 15% |
+| **Module 4** | LibreOffice Impress (Presentation Design & Slides) | 10 | 10% |
+| **Module 5** | Internet, WWW, Web Browsers & Email Communication | 15 | 15% |
+| **Module 6** | Digital Financial Services, UPI, Net Banking & Cyber Security | 15 | 15% |
+| **Module 7** | Future Skills & Overview of Cyber Security Fundamentals | 10 | 10% |
+
+## ❓ Frequently Asked Questions (FAQs)
+
+### What is the passing criteria for the NIELIT CCC Exam?
+You need a minimum score of **50% (50 marks out of 100)** to pass the examination and earn your CCC certification.
+
+### Is there negative marking in the CCC Exam?
+No, the official NIELIT CCC exam typically does not have negative marking. You should attempt all 100 questions.
+
+### Are these tests accessible on mobile devices?
+Yes! You can attempt all test sets seamlessly on mobile phones, tablets, and desktop browsers.
+`;
+    setDescriptionMd(template);
+    success("SEO Template Inserted", "Rich SEO structure and syllabus loaded into markdown editor.");
+  };
+
   const openCreateModal = () => {
     setEditingSeries(null);
     setCategoryId(testCategories[0]?.id || "");
     setTitle("");
+    setSlug("");
     setDescription("");
+    setDescriptionMd("");
     setIsFeatured(false);
     setFeaturedTag("RECOMMENDED");
     setFeaturedShortDesc("");
@@ -92,7 +142,9 @@ export const TestSeriesPage: React.FC = () => {
     setEditingSeries(item);
     setCategoryId(item.category_id || "");
     setTitle(item.title);
+    setSlug(item.slug || generateSlug(item.title));
     setDescription(item.description || "");
+    setDescriptionMd(item.description_md || "");
     setIsFeatured(item.is_featured);
     setFeaturedTag(item.featured_tag || "");
     setFeaturedShortDesc(item.featured_short_desc || "");
@@ -109,9 +161,19 @@ export const TestSeriesPage: React.FC = () => {
     e.preventDefault();
     const errors: { [key: string]: string } = {};
     if (!title.trim()) errors.title = "Series title is required.";
+    if (!slug.trim()) errors.slug = "SEO URL slug is required.";
     if (!categoryId) errors.categoryId = "Please select a test category.";
     if (isPaid && Number(price) <= 0)
       errors.price = "Please enter a valid price for paid series.";
+
+    // Check slug uniqueness
+    const normalizedSlug = slug.trim().toLowerCase();
+    const slugExists = testSeries.some(
+      (s) => s.slug === normalizedSlug && s.id !== editingSeries?.id,
+    );
+    if (slugExists) {
+      errors.slug = "This slug is already in use by another test series. Please choose a unique slug.";
+    }
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -122,7 +184,9 @@ export const TestSeriesPage: React.FC = () => {
       const payload: any = {
         category_id: categoryId,
         title: title.trim(),
+        slug: normalizedSlug,
         description: description.trim() || null,
+        description_md: descriptionMd.trim() || null,
         is_featured: isFeatured,
         featured_tag:
           isFeatured && featuredTag.trim() ? featuredTag.trim() : null,
@@ -135,6 +199,7 @@ export const TestSeriesPage: React.FC = () => {
         is_paid: isPaid,
         price: isPaid ? Number(price) : 0,
         currency: currency || "INR",
+        is_active: isActive,
       };
 
       if (editingSeries) {
@@ -198,6 +263,8 @@ export const TestSeriesPage: React.FC = () => {
   const filteredSeries = testSeries.filter((item) => {
     const matchSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.slug &&
+        item.slug.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (item.description &&
         item.description.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchCategory =
@@ -240,12 +307,27 @@ export const TestSeriesPage: React.FC = () => {
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-2 text-xs text-dark-muted">
-              <span>Category: {category?.title || "General"}</span>
+            <div className="flex items-center gap-2 text-xs text-dark-muted flex-wrap">
+              {item.slug && (
+                <span className="font-mono text-[11px] text-lavender-400 bg-lavender-500/10 px-1.5 py-0.5 rounded border border-lavender-500/20">
+                  /{item.slug}
+                </span>
+              )}
+              {item.description_md && (
+                <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 font-medium">
+                  SEO MD
+                </span>
+              )}
               <span>•</span>
-              <span className="text-dark-dim truncate max-w-xs">
-                {item.description}
-              </span>
+              <span>Category: {category?.title || "General"}</span>
+              {item.description && (
+                <>
+                  <span>•</span>
+                  <span className="text-dark-dim truncate max-w-xs">
+                    {item.description}
+                  </span>
+                </>
+              )}
             </div>
           </div>
         );
@@ -343,7 +425,7 @@ export const TestSeriesPage: React.FC = () => {
       <SearchFilterBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search test series by title or description..."
+        searchPlaceholder="Search test series by title, slug, or description..."
         filters={[
           {
             key: "category",
@@ -417,7 +499,7 @@ export const TestSeriesPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         size="lg"
         title={editingSeries ? "Edit Test Series" : "Create New Test Series"}
-        subtitle="Configure series title, pricing, featured badge and syllabus metadata in Supabase"
+        subtitle="Configure series title, SEO slug, pricing, featured badge and syllabus metadata in Supabase"
         footer={
           <>
             <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
@@ -447,19 +529,55 @@ export const TestSeriesPage: React.FC = () => {
               label="Series Title"
               placeholder="e.g. CCC 2026 Ultimate Test Series"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => handleTitleChange(e.target.value)}
               error={formErrors.title}
               required
             />
           </div>
 
+          <Input
+            label="SEO URL Slug *"
+            placeholder="e.g. ccc-2026-ultimate-test-series"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+            error={formErrors.slug}
+            helperText="SEO-friendly identifier used in routes and URLs (e.g., /tests/series/slug)"
+            required
+          />
+
           <Textarea
-            label="Full Description"
-            placeholder="Detailed description of what this series includes..."
+            label="Short Summary / Card Description"
+            placeholder="Short description shown on mobile cards and list views..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            rows={3}
+            rows={2}
           />
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-dark-muted flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-lavender-400" />
+                SEO Long Description & Syllabus (Markdown)
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleInsertSeoTemplate}
+                className="text-xs text-lavender-300 hover:text-white bg-lavender-500/10 hover:bg-lavender-500/20 border border-lavender-500/20 py-1 h-7"
+              >
+                <BookOpen className="w-3.5 h-3.5 mr-1" />
+                Load SEO Template
+              </Button>
+            </div>
+            <RichTextEditor
+              value={descriptionMd}
+              onChange={setDescriptionMd}
+              placeholder="Write rich markdown content for Google SEO ranking, including syllabus tables, exam highlights, and FAQs..."
+              rows={8}
+              helperText="Structured markdown with headings and tables helps search engines index and rank your test series for relevant student search queries."
+            />
+          </div>
 
           <div className="p-4 rounded-2xl bg-background-elevated/50 border border-dark-border space-y-4">
             <div className="flex items-center justify-between">
@@ -523,13 +641,16 @@ export const TestSeriesPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Expected Total Sets"
-              type="number"
-              min={1}
-              value={totalSets}
-              onChange={(e) => setTotalSets(Number(e.target.value))}
-            />
+            <div>
+              <Input
+                label="Total Sets Available"
+                type="number"
+                min={0}
+                value={totalSets}
+                onChange={(e) => setTotalSets(Number(e.target.value))}
+                helperText="Auto-updates automatically as test sets are added or deleted."
+              />
+            </div>
             <div className="pt-2">
               <Switch
                 checked={isActive}

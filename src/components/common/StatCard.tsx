@@ -45,7 +45,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           <p className="text-xs font-semibold uppercase tracking-wider text-dark-muted mb-1">
             {title}
           </p>
-          <h3 className="text-2xl font-extrabold text-white tracking-tight">
+          <h3 className="text-2xl font-extrabold text-dark-text tracking-tight">
             {value}
           </h3>
           {subtitle && <p className="text-xs text-dark-dim mt-1">{subtitle}</p>}

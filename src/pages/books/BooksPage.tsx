@@ -5,6 +5,9 @@ import {
   Trash2,
   BookMarked,
   Link as LinkIcon,
+  Upload,
+  Image as ImageIcon,
+  X,
 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { Book, BookCategory } from '../../types/database';
@@ -51,6 +54,7 @@ export const BooksPage: React.FC = () => {
   const [description, setDescription] = useState('');
   const [hindiDescription, setHindiDescription] = useState('');
   const [coverImage, setCoverImage] = useState('');
+  const [coverInputMode, setCoverInputMode] = useState<'upload' | 'url'>('upload');
   const [language, setLanguage] = useState('Bilingual (Hindi/English)');
   const [pages, setPages] = useState(250);
   const [edition, setEdition] = useState('2026 Edition');
@@ -481,15 +485,109 @@ export const BooksPage: React.FC = () => {
             />
           </div>
 
-          <FileUpload
-            bucket={APP_CONFIG.STORAGE_BUCKETS.BOOK_COVERS}
-            type="image"
-            accept="image/*"
-            label="Book Cover Image"
-            value={coverImage}
-            onChange={(url) => setCoverImage(url)}
-            helperText="Uploaded to Supabase Storage and displayed in the mobile store."
-          />
+          <div className="space-y-3 p-4 rounded-2xl bg-background-elevated/40 border border-dark-border">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-lavender-400" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-white">
+                  Book Cover Image
+                </span>
+                <span className="text-[10px] text-dark-muted font-normal">(Optional)</span>
+              </div>
+
+              {/* Mode Switcher Tabs */}
+              <div className="flex items-center bg-background rounded-lg p-0.5 border border-dark-border text-xs">
+                <button
+                  type="button"
+                  onClick={() => setCoverInputMode('upload')}
+                  className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                    coverInputMode === 'upload'
+                      ? 'bg-lavender-500 text-white font-medium shadow-sm'
+                      : 'text-dark-muted hover:text-white'
+                  }`}
+                >
+                  <Upload className="w-3 h-3" />
+                  <span>Upload Image</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCoverInputMode('url')}
+                  className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                    coverInputMode === 'url'
+                      ? 'bg-lavender-500 text-white font-medium shadow-sm'
+                      : 'text-dark-muted hover:text-white'
+                  }`}
+                >
+                  <LinkIcon className="w-3 h-3" />
+                  <span>Paste Cover URL</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Upload Mode */}
+            {coverInputMode === 'upload' && (
+              <FileUpload
+                bucket={APP_CONFIG.STORAGE_BUCKETS.BOOK_COVERS}
+                type="image"
+                accept="image/*"
+                value={coverImage}
+                onChange={(url) => setCoverImage(url)}
+                helperText="Upload book cover to Supabase Storage, or switch to 'Paste Cover URL' for external links."
+              />
+            )}
+
+            {/* Direct URL Paste Mode */}
+            {coverInputMode === 'url' && (
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Paste direct cover image URL (e.g. https://images-na.ssl-images-amazon.com/... or CDN link)"
+                    value={coverImage}
+                    onChange={(e) => setCoverImage(e.target.value.trim())}
+                    className="flex-1"
+                  />
+                  {coverImage && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCoverImage('')}
+                      className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 shrink-0"
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Clear
+                    </Button>
+                  )}
+                </div>
+
+                {/* Live Preview */}
+                {coverImage && (
+                  <div className="p-2.5 rounded-xl bg-background border border-dark-border/80 flex items-center gap-3">
+                    <div className="w-16 h-20 rounded-lg overflow-hidden border border-dark-border bg-dark-bg shrink-0 shadow-sm">
+                      <img
+                        src={coverImage}
+                        alt="Book Cover Preview"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%23f43f5e" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-white">External Cover Linked</span>
+                        <Badge variant="success" size="sm">
+                          Active URL
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-dark-muted font-mono truncate">{coverImage}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
             <Switch

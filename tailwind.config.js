@@ -9,11 +9,11 @@ export default {
     extend: {
       colors: {
         background: {
-          DEFAULT: '#090A0F',
-          subtle: '#0D0F17',
-          card: '#121420',
-          elevated: '#1A1C2E',
-          hover: '#22253B',
+          DEFAULT: 'rgb(var(--bg-base-rgb) / <alpha-value>)',
+          subtle: 'rgb(var(--bg-subtle-rgb) / <alpha-value>)',
+          card: 'rgb(var(--bg-card-rgb) / <alpha-value>)',
+          elevated: 'rgb(var(--bg-elevated-rgb) / <alpha-value>)',
+          hover: 'rgb(var(--bg-hover-rgb) / <alpha-value>)',
         },
         lavender: {
           50: '#F5F3FF',
@@ -31,12 +31,12 @@ export default {
           glow: 'rgba(157, 140, 252, 0.35)',
         },
         dark: {
-          border: 'rgba(255, 255, 255, 0.08)',
+          border: 'rgb(var(--border-rgb) / <alpha-value>)',
           'border-hover': 'rgba(157, 140, 252, 0.3)',
           'border-active': 'rgba(157, 140, 252, 0.6)',
-          text: '#F1F1F8',
-          muted: '#9496B8',
-          dim: '#5E6188',
+          text: 'rgb(var(--text-primary-rgb) / <alpha-value>)',
+          muted: 'rgb(var(--text-muted-rgb) / <alpha-value>)',
+          dim: 'rgb(var(--text-dim-rgb) / <alpha-value>)',
         }
       },
       fontFamily: {
@@ -46,7 +46,7 @@ export default {
         'glow-sm': '0 0 15px -3px rgba(157, 140, 252, 0.25)',
         'glow': '0 0 25px -5px rgba(157, 140, 252, 0.35)',
         'glow-lg': '0 0 40px -10px rgba(157, 140, 252, 0.45)',
-        'card': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        'card': 'var(--card-shadow)',
       },
       animation: {
         'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

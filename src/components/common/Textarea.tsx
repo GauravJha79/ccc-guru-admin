@@ -27,7 +27,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           id={textareaId}
           rows={rows}
           className={cn(
-            "w-full bg-background-elevated/70 border border-dark-border rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-dark-dim transition-all duration-200 focus:outline-none focus:border-lavender-500 focus:ring-1 focus:ring-lavender-500 focus:bg-background-elevated disabled:opacity-50 resize-y",
+            "w-full bg-background-elevated/70 border border-dark-border rounded-xl px-3.5 py-2.5 text-sm text-dark-text placeholder:text-dark-dim transition-all duration-200 focus:outline-none focus:border-lavender-500 focus:ring-1 focus:ring-lavender-500 focus:bg-background-elevated disabled:opacity-50 resize-y",
             error &&
               "border-rose-500/60 focus:border-rose-500 focus:ring-rose-500",
             className,

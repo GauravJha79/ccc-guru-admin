@@ -42,7 +42,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             ref={ref}
             id={selectId}
             className={cn(
-              "w-full appearance-none bg-background-elevated/70 border border-dark-border rounded-xl px-3.5 py-2.5 pr-10 text-sm text-white transition-all duration-200 focus:outline-none focus:border-lavender-500 focus:ring-1 focus:ring-lavender-500 focus:bg-background-elevated disabled:opacity-50 cursor-pointer",
+              "w-full appearance-none bg-background-elevated/70 border border-dark-border rounded-xl px-3.5 py-2.5 pr-10 text-sm text-dark-text transition-all duration-200 focus:outline-none focus:border-lavender-500 focus:ring-1 focus:ring-lavender-500 focus:bg-background-elevated disabled:opacity-50 cursor-pointer",
               error &&
                 "border-rose-500/60 focus:border-rose-500 focus:ring-rose-500",
               className,
@@ -53,7 +53,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
               <option
                 key={opt.value}
                 value={opt.value}
-                className="bg-background-elevated text-white py-1.5"
+                className="bg-background-elevated text-dark-text py-1.5"
               >
                 {opt.label}
               </option>

@@ -16,10 +16,14 @@ import {
   LogOut,
   Sparkles,
   ChevronRight,
+  GraduationCap,
+  CreditCard,
+  CheckCircle2,
 } from "lucide-react";
 import { ROUTES } from "../../constants/routes";
 import { useAuth } from "../../contexts/AuthContext";
 import { Badge } from "../common/Badge";
+import { ThemeToggle } from "../common/ThemeToggle";
 import { cn } from "../../lib/utils";
 
 export interface NavSection {
@@ -51,7 +55,28 @@ export const Sidebar: React.FC<{ onCloseMobile?: () => void }> = ({
       ],
     },
     {
+      title: "Course Management",
+      items: [
+        {
+          label: "All Courses",
+          path: ROUTES.COURSES,
+          icon: <GraduationCap className="w-4 h-4" />,
+        },
+        {
+          label: "Course Enrollments",
+          path: ROUTES.COURSE_ENROLLMENTS,
+          icon: <Users className="w-4 h-4" />,
+        },
+        {
+          label: "Course Payments",
+          path: ROUTES.COURSE_PAYMENTS,
+          icon: <CreditCard className="w-4 h-4" />,
+        },
+      ],
+    },
+    {
       title: "Test Management",
+
       items: [
         {
           label: "Test Categories",
@@ -234,28 +259,31 @@ export const Sidebar: React.FC<{ onCloseMobile?: () => void }> = ({
       </div>
 
       {/* User Footer Profile */}
-      <div className="p-4 border-t border-dark-border/80 bg-background-subtle/50">
+      <div className="p-4 border-t border-dark-border/80 bg-background-subtle/50 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-lavender-600/30 text-lavender-300 font-bold border border-lavender-500/40 flex items-center justify-center text-sm shadow-sm flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-lavender-600/30 text-lavender-400 font-bold border border-lavender-500/40 flex items-center justify-center text-sm shadow-sm flex-shrink-0">
               {user?.name ? user.name[0].toUpperCase() : "A"}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-white truncate">
+              <p className="text-xs font-bold text-dark-text truncate">
                 {user?.name || "Admin User"}
               </p>
-              <p className="text-[10px] text-lavender-400 capitalize truncate font-medium">
+              <p className="text-[10px] text-lavender-500 capitalize truncate font-medium">
                 {user?.role?.replace("_", " ") || "Super Admin"}
               </p>
             </div>
           </div>
-          <button
-            onClick={logout}
-            className="p-2 text-dark-dim hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors"
-            title="Sign Out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-1">
+            <ThemeToggle className="p-1.5" />
+            <button
+              onClick={logout}
+              className="p-2 text-dark-dim hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors"
+              title="Sign Out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </aside>

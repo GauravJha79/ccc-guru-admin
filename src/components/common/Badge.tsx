@@ -22,8 +22,8 @@ export const Badge: React.FC<BadgeProps> = ({
     warning: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
     danger: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
     info: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
-    neutral: 'bg-white/5 text-dark-muted border-white/10',
-    outline: 'bg-transparent text-dark-muted border-white/15',
+    neutral: 'bg-lavender-500/10 text-dark-muted border-dark-border',
+    outline: 'bg-transparent text-dark-muted border-dark-border',
   };
 
   const dotColors = {

@@ -6,6 +6,12 @@ import {
   Eye,
   Calendar,
   User as UserIcon,
+  Sparkles,
+  Palette,
+  Link as LinkIcon,
+  Upload,
+  Image as ImageIcon,
+  X,
 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -26,6 +32,8 @@ import { FileUpload } from '../../components/common/FileUpload';
 import { RichTextEditor } from '../../components/common/RichTextEditor';
 import { formatDate, generateSlug } from '../../lib/utils';
 import { APP_CONFIG } from '../../constants/config';
+import { AiBlogGenerateModal } from './AiBlogGenerateModal';
+import { geminiBlogService, BANNER_THEMES } from '../../services/geminiBlogService';
 
 export const BlogsPage: React.FC = () => {
   const { user } = useAuth();
@@ -44,8 +52,10 @@ export const BlogsPage: React.FC = () => {
   const [pageSize, setPageSize] = useState(APP_CONFIG.DEFAULT_PAGE_SIZE);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [previewBlog, setPreviewBlog] = useState<Blog | null>(null);
+  const [isGeneratingBanner, setIsGeneratingBanner] = useState(false);
 
   // Form State
   const [categoryId, setCategoryId] = useState('');
@@ -57,6 +67,7 @@ export const BlogsPage: React.FC = () => {
   const [contentEn, setContentEn] = useState('');
   const [contentHi, setContentHi] = useState('');
   const [featuredImage, setFeaturedImage] = useState('');
+  const [imageInputMode, setImageInputMode] = useState<'upload' | 'url'>('upload');
   const [author, setAuthor] = useState('');
   const [isFeatured, setIsFeatured] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
@@ -126,6 +137,29 @@ export const BlogsPage: React.FC = () => {
     setIsPublished(blog.is_published);
     setFormErrors({});
     setIsModalOpen(true);
+  };
+
+  const handleGenerateThumbnailForForm = async () => {
+    if (!titleEn.trim()) {
+      toastError('Title Required', 'Please enter an English title before generating a banner.');
+      return;
+    }
+
+    setIsGeneratingBanner(true);
+    try {
+      const selectedCat = blogCategories.find((c) => c.id === categoryId);
+      const url = await geminiBlogService.generateAndUploadBanner(
+        titleEn.trim(),
+        selectedCat?.title || 'CCC Study Guide',
+        BANNER_THEMES[0]
+      );
+      setFeaturedImage(url);
+      success('Banner Generated', 'Created and attached high-resolution blog banner.');
+    } catch (err: any) {
+      toastError('Banner Failed', err.message || 'Could not generate banner image.');
+    } finally {
+      setIsGeneratingBanner(false);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -376,6 +410,16 @@ export const BlogsPage: React.FC = () => {
           setPublishedFilter('');
           setFeaturedFilter('');
         }}
+        extraActions={
+          <Button
+            variant="outline"
+            onClick={() => setIsAiModalOpen(true)}
+            leftIcon={<Sparkles className="w-4 h-4 text-lavender-400 animate-pulse" />}
+            className="bg-lavender-500/10 hover:bg-lavender-500/20 border-lavender-500/30 text-lavender-200"
+          >
+            Generate with AI
+          </Button>
+        }
         actionButton={{
           label: 'Write Article',
           onClick: openCreateModal,
@@ -483,15 +527,125 @@ export const BlogsPage: React.FC = () => {
             />
           </div>
 
-          <FileUpload
-            bucket={APP_CONFIG.STORAGE_BUCKETS.BLOG_IMAGES}
-            type="image"
-            accept="image/*"
-            label="Featured Banner Image (Optional)"
-            value={featuredImage}
-            onChange={(url) => setFeaturedImage(url)}
-            helperText="Banner image uploaded to Supabase Storage for the article header."
-          />
+          <div className="space-y-3 p-4 rounded-2xl bg-background-elevated/40 border border-dark-border">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-white">
+                  Featured Banner Image
+                </span>
+                <span className="text-[10px] text-dark-muted font-normal">(Optional)</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* Mode Selector Tabs */}
+                <div className="flex items-center bg-background rounded-lg p-0.5 border border-dark-border text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setImageInputMode('upload')}
+                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                      imageInputMode === 'upload'
+                        ? 'bg-lavender-500 text-white font-medium shadow-sm'
+                        : 'text-dark-muted hover:text-white'
+                    }`}
+                  >
+                    <Upload className="w-3 h-3" />
+                    <span>Upload File</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setImageInputMode('url')}
+                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                      imageInputMode === 'url'
+                        ? 'bg-lavender-500 text-white font-medium shadow-sm'
+                        : 'text-dark-muted hover:text-white'
+                    }`}
+                  >
+                    <LinkIcon className="w-3 h-3" />
+                    <span>Paste Image URL</span>
+                  </button>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateThumbnailForForm}
+                  isLoading={isGeneratingBanner}
+                  leftIcon={<Sparkles className="w-3.5 h-3.5 text-lavender-400" />}
+                  className="text-xs py-1"
+                >
+                  {isGeneratingBanner ? 'Generating...' : '✨ Generate AI Banner'}
+                </Button>
+              </div>
+            </div>
+
+            {/* Upload Mode */}
+            {imageInputMode === 'upload' && (
+              <FileUpload
+                bucket={APP_CONFIG.STORAGE_BUCKETS.BLOG_IMAGES}
+                type="image"
+                accept="image/*"
+                value={featuredImage}
+                onChange={(url) => setFeaturedImage(url)}
+                helperText="Upload image to Supabase Storage, or switch to 'Paste Image URL' for external links."
+              />
+            )}
+
+            {/* Direct URL Paste Mode */}
+            {imageInputMode === 'url' && (
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Paste direct image URL e.g. https://images.unsplash.com/photo-... or external bucket link"
+                    value={featuredImage}
+                    onChange={(e) => setFeaturedImage(e.target.value.trim())}
+                    className="flex-1"
+                  />
+                  {featuredImage && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setFeaturedImage('')}
+                      className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 shrink-0"
+                    >
+                      <X className="w-4 h-4 mr-1" />
+                      Clear
+                    </Button>
+                  )}
+                </div>
+
+                {/* Live Preview of Pasted URL */}
+                {featuredImage && (
+                  <div className="p-2.5 rounded-xl bg-background border border-dark-border/80 flex items-center gap-3">
+                    <div className="w-24 h-16 rounded-lg overflow-hidden border border-dark-border bg-dark-bg shrink-0">
+                      <img
+                        src={featuredImage}
+                        alt="Banner Preview"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%23f43f5e" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <ImageIcon className="w-3.5 h-3.5 text-lavender-400" />
+                        <span className="text-xs font-semibold text-white">External Image Linked</span>
+                        <Badge variant="success" size="sm">
+                          Active URL
+                        </Badge>
+                      </div>
+                      <p className="text-[11px] text-dark-muted font-mono truncate">
+                        {featuredImage}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <div className="space-y-4">
             <RichTextEditor
@@ -581,6 +735,16 @@ export const BlogsPage: React.FC = () => {
         isLoading={isDeleting}
         title="Delete Article"
         message={`Are you sure you want to permanently delete "${deleteTarget?.title_en}" from Supabase?`}
+      />
+
+      <AiBlogGenerateModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        categories={blogCategories}
+        authorName={user?.name || 'CCC Prep Team'}
+        onSuccess={() => {
+          fetchData();
+        }}
       />
     </div>
   );

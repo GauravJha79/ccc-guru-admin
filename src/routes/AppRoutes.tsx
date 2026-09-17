@@ -10,6 +10,10 @@ import { AdminLayout } from '../components/layout/AdminLayout';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
+import { CoursesPage } from '../pages/courses/CoursesPage';
+import { CourseBuilderPage } from '../pages/courses/CourseBuilderPage';
+import { CourseEnrollmentsPage } from '../pages/courses/CourseEnrollmentsPage';
+import { CoursePaymentsPage } from '../pages/courses/CoursePaymentsPage';
 import { TestCategoriesPage } from '../pages/tests/TestCategoriesPage';
 import { TestSeriesPage } from '../pages/tests/TestSeriesPage';
 import { TestSeriesItemsPage } from '../pages/tests/TestSeriesItemsPage';
@@ -45,9 +49,16 @@ export const AppRoutes: React.FC = () => {
       >
         <Route index element={<DashboardPage />} />
 
+        {/* Course Management */}
+        <Route path={ROUTES.COURSES} element={<CoursesPage />} />
+        <Route path={ROUTES.COURSE_BUILDER} element={<CourseBuilderPage />} />
+        <Route path={ROUTES.COURSE_ENROLLMENTS} element={<CourseEnrollmentsPage />} />
+        <Route path={ROUTES.COURSE_PAYMENTS} element={<CoursePaymentsPage />} />
+
         {/* Test Management */}
         <Route path={ROUTES.TEST_CATEGORIES} element={<TestCategoriesPage />} />
         <Route path={ROUTES.TEST_SERIES} element={<TestSeriesPage />} />
+
         <Route path={ROUTES.TEST_SERIES_ITEMS} element={<TestSeriesItemsPage />} />
 
         {/* Chapters & Questions */}

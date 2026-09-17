@@ -24,7 +24,9 @@ export interface TestSeries {
   id: string;
   category_id: string;
   title: string;
+  slug: string;
   description?: string | null;
+  description_md?: string | null;
   is_featured: boolean;
   featured_tag?: string | null;
   featured_short_desc?: string | null;
@@ -235,3 +237,152 @@ export interface SeriesEnrollment {
   // Joins
   series?: TestSeries;
 }
+
+// Course Management Types
+export type LessonType = 'text' | 'video' | 'mixed';
+export type CourseAccessType = 'free' | 'paid' | 'promotional';
+export type CourseEnrollmentStatus = 'active' | 'expired' | 'revoked';
+export type CoursePaymentStatus = 'pending' | 'success' | 'failed' | 'refunded';
+
+export interface Course {
+  id: string;
+  title: string;
+  title_hi: string;
+  slug: string;
+  description?: string | null;
+  description_hi?: string | null;
+  thumbnail?: string | null;
+  is_paid: boolean;
+  price: number;
+  currency: string;
+  is_featured: boolean;
+  is_published: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  // Joins & computed
+  modules_count?: number;
+  lessons_count?: number;
+  enrollments_count?: number;
+  modules?: CourseModule[];
+}
+
+export interface CourseModule {
+  id: string;
+  course_id: string;
+  title: string;
+  title_hi: string;
+  description?: string | null;
+  description_hi?: string | null;
+  sort_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  // Joins & counts
+  lessons_count?: number;
+  notes_count?: number;
+  tests_count?: number;
+  questions_count?: number;
+  lessons?: CourseLesson[];
+  notes?: CourseModuleNote[];
+  tests?: CourseModuleTest[];
+  questions?: CourseModuleQuestion[];
+}
+
+export interface CourseLesson {
+  id: string;
+  module_id: string;
+  title: string;
+  title_hi: string;
+  lesson_type: LessonType;
+  content?: string | null;
+  content_hi?: string | null;
+  video_url?: string | null;
+  duration_minutes: number;
+  sort_order: number;
+  is_free_preview: boolean;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CourseModuleNote {
+  id: string;
+  module_id: string;
+  note_id: string;
+  sort_order: number;
+  created_at: string;
+  // Joins
+  note?: Note;
+}
+
+export interface CourseModuleTest {
+  id: string;
+  module_id: string;
+  test_id: string;
+  sort_order: number;
+  created_at: string;
+  // Joins
+  test_item?: TestSeriesItem;
+}
+
+export interface CourseModuleQuestion {
+  id: string;
+  module_id: string;
+  question_id: string;
+  sort_order: number;
+  created_at: string;
+  // Joins
+  question?: Question;
+}
+
+export interface CourseEnrollment {
+  id: string;
+  user_id: string;
+  user_name?: string | null;
+  user_email?: string | null;
+  course_id: string;
+  access_type: CourseAccessType;
+  status: CourseEnrollmentStatus;
+  enrolled_at: string;
+  expires_at?: string | null;
+  created_at: string;
+  // Joins
+  course?: Course;
+  progress_percentage?: number;
+  completed_lessons_count?: number;
+  total_lessons_count?: number;
+}
+
+export interface CoursePayment {
+  id: string;
+  user_id: string;
+  user_name?: string | null;
+  user_email?: string | null;
+  course_id: string;
+  order_id?: string | null;
+  payment_id?: string | null;
+  signature?: string | null;
+  amount: number;
+  currency: string;
+  payment_gateway: string;
+  status: CoursePaymentStatus;
+  paid_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  // Joins
+  course?: Course;
+}
+
+export interface CourseLessonProgress {
+  id: string;
+  user_id: string;
+  course_id: string;
+  module_id: string;
+  lesson_id: string;
+  is_completed: boolean;
+  completed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+

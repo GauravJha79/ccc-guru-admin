@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Plus, Edit2, Trash2, Eye, Layers, Link2, Upload } from "lucide-react";
+import { Plus, Edit2, Trash2, Eye, Layers, Link2, Upload, Sparkles } from "lucide-react";
 import { useToast } from "../../contexts/ToastContext";
 import {
   Question,
@@ -28,6 +28,7 @@ import { Button } from "../../components/common/Button";
 import { QuestionPreviewModal } from "./QuestionPreviewModal";
 import { QuestionAssignmentModal } from "./QuestionAssignmentModal";
 import { BulkQuestionUploadModal } from "./BulkQuestionUploadModal";
+import { AiQuestionGenerateModal } from "./AiQuestionGenerateModal";
 import { DIFFICULTY_OPTIONS, APP_CONFIG } from "../../constants/config";
 
 export const QuestionBankPage: React.FC = () => {
@@ -55,6 +56,7 @@ export const QuestionBankPage: React.FC = () => {
   const [previewQuestion, setPreviewQuestion] = useState<Question | null>(null);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isBulkUploadModalOpen, setIsBulkUploadModalOpen] = useState(false);
+  const [isAiGenerateModalOpen, setIsAiGenerateModalOpen] = useState(false);
 
   // Form Modal state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -84,6 +86,8 @@ export const QuestionBankPage: React.FC = () => {
 
   const [deleteTarget, setDeleteTarget] = useState<Question | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -248,6 +252,26 @@ export const QuestionBankPage: React.FC = () => {
       toastError("Delete Failed", err.message || "Could not delete question.");
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    setIsBulkDeleting(true);
+    try {
+      await questionService.deleteQuestionsBulk(selectedIds);
+      const deletedSet = new Set(selectedIds);
+      setQuestions((prev) => prev.filter((q) => !deletedSet.has(q.id)));
+      success(
+        "Questions Deleted",
+        `Successfully deleted ${selectedIds.length} questions from Supabase.`
+      );
+      setSelectedIds([]);
+      setIsBulkDeleteDialogOpen(false);
+    } catch (err: any) {
+      toastError("Bulk Delete Failed", err.message || "Could not delete selected questions.");
+    } finally {
+      setIsBulkDeleting(false);
     }
   };
 
@@ -552,19 +576,36 @@ export const QuestionBankPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
+              onClick={() => setIsAiGenerateModalOpen(true)}
+              leftIcon={<Sparkles className="w-4 h-4 text-lavender-400 animate-pulse" />}
+              className="bg-lavender-500/10 hover:bg-lavender-500/20 border-lavender-500/30 text-lavender-200"
+            >
+              Generate with AI
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => setIsBulkUploadModalOpen(true)}
               leftIcon={<Upload className="w-4 h-4 text-lavender-400" />}
             >
               Bulk Upload
             </Button>
             {selectedIds.length > 0 && (
-              <Button
-                variant="secondary"
-                onClick={() => setIsAssignModalOpen(true)}
-                leftIcon={<Link2 className="w-4 h-4 text-lavender-400" />}
-              >
-                Assign Selected ({selectedIds.length})
-              </Button>
+              <>
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsAssignModalOpen(true)}
+                  leftIcon={<Link2 className="w-4 h-4 text-lavender-400" />}
+                >
+                  Assign Selected ({selectedIds.length})
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={() => setIsBulkDeleteDialogOpen(true)}
+                  leftIcon={<Trash2 className="w-4 h-4 text-rose-300" />}
+                >
+                  Delete Selected ({selectedIds.length})
+                </Button>
+              </>
             )}
           </div>
         }
@@ -909,9 +950,16 @@ export const QuestionBankPage: React.FC = () => {
 
       <QuestionPreviewModal
         question={previewQuestion}
+        questionsList={filteredQuestions}
         chapters={chapters}
+        testSeriesItems={testSeriesItems}
         isOpen={Boolean(previewQuestion)}
         onClose={() => setPreviewQuestion(null)}
+        onQuestionChange={(updated) => {
+          setQuestions((prev) => prev.map((q) => (q.id === updated.id ? updated : q)));
+          setPreviewQuestion(updated);
+        }}
+        onNavigate={(nextQ) => setPreviewQuestion(nextQ)}
       />
 
       <QuestionAssignmentModal
@@ -936,6 +984,17 @@ export const QuestionBankPage: React.FC = () => {
         }}
       />
 
+      <AiQuestionGenerateModal
+        isOpen={isAiGenerateModalOpen}
+        onClose={() => setIsAiGenerateModalOpen(false)}
+        chapters={chapters}
+        testSeriesItems={testSeriesItems}
+        defaultTestItemId={testItemFilter}
+        onSuccess={() => {
+          fetchData();
+        }}
+      />
+
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
@@ -943,6 +1002,16 @@ export const QuestionBankPage: React.FC = () => {
         isLoading={isDeleting}
         title="Delete Question"
         message={`Are you sure you want to permanently delete this question from Supabase?`}
+      />
+
+      <ConfirmDialog
+        isOpen={isBulkDeleteDialogOpen}
+        onClose={() => setIsBulkDeleteDialogOpen(false)}
+        onConfirm={handleBulkDelete}
+        isLoading={isBulkDeleting}
+        title={`Delete ${selectedIds.length} Questions`}
+        message={`Are you sure you want to permanently delete ${selectedIds.length} selected questions from Supabase? This action cannot be undone.`}
+        confirmText={`Delete ${selectedIds.length} Questions`}
       />
     </div>
   );

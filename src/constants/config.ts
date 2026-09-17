@@ -10,6 +10,7 @@ export const APP_CONFIG = {
     BLOG_IMAGES: 'blog-images',
     BOOK_COVERS: 'book-covers',
     AVATARS: 'avatars',
+    COURSE_THUMBNAILS: 'course-thumbnails',
   },
 };
 
@@ -54,3 +55,25 @@ export const ENROLLMENT_STATUS_OPTIONS = [
   { value: 'expired', label: 'Expired' },
   { value: 'revoked', label: 'Revoked' },
 ] as const;
+
+export const LESSON_TYPE_OPTIONS = [
+  { value: 'text', label: 'Text Lesson' },
+  { value: 'video', label: 'Video Lesson' },
+  { value: 'mixed', label: 'Mixed (Video + Text)' },
+] as const;
+
+export const COURSE_ACCESS_OPTIONS = ENROLLMENT_ACCESS_OPTIONS;
+export const COURSE_STATUS_OPTIONS = ENROLLMENT_STATUS_OPTIONS;
+
+export const COURSE_PAYMENT_STATUS_OPTIONS = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'success', label: 'Success' },
+  { value: 'failed', label: 'Failed' },
+  { value: 'refunded', label: 'Refunded' },
+] as const;
+
+export const COURSE_PRICE_CURRENCIES = [
+  { value: 'INR', label: 'INR (₹)' },
+  { value: 'USD', label: 'USD ($)' },
+] as const;
+
