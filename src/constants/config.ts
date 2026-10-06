@@ -11,6 +11,7 @@ export const APP_CONFIG = {
     BOOK_COVERS: 'book-covers',
     AVATARS: 'avatars',
     COURSE_THUMBNAILS: 'course-thumbnails',
+    TEST_SERIES_IMAGES: 'test-series-images',
   },
 };
 

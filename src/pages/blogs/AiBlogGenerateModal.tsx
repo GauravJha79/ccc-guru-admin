@@ -45,7 +45,12 @@ interface AiBlogGenerateModalProps {
   isOpen: boolean;
   onClose: () => void;
   categories: BlogCategory[];
-  onSuccess: (newBlog: Blog) => void;
+  onSuccess?: (newBlog: Blog) => void;
+  onApplyGenerated?: (
+    generated: GeneratedBlogResult,
+    thumbnailUrl: string,
+    catId: string
+  ) => void;
   authorName?: string;
 }
 
@@ -54,6 +59,7 @@ export const AiBlogGenerateModal: React.FC<AiBlogGenerateModalProps> = ({
   onClose,
   categories,
   onSuccess,
+  onApplyGenerated,
   authorName = 'CCC Prep Team',
 }) => {
   const { success, error: toastError } = useToast();
@@ -267,7 +273,9 @@ export const AiBlogGenerateModal: React.FC<AiBlogGenerateModalProps> = ({
 
       const created = await blogService.createBlog(payload);
       success('Article Created', `Published "${created.title_en}"`);
-      onSuccess(created);
+      if (onSuccess) {
+        onSuccess(created);
+      }
       handleResetAndClose();
     } catch (err: any) {
       toastError('Save Failed', err.message || 'Could not save article to database.');
@@ -339,27 +347,47 @@ export const AiBlogGenerateModal: React.FC<AiBlogGenerateModalProps> = ({
             </div>
           </div>
         ) : step === 'review' ? (
-          <div className="flex items-center justify-between w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
             <div className="text-xs text-dark-muted">
               Ready to save as:{' '}
               <strong className={isPublished ? 'text-emerald-400' : 'text-amber-400'}>
                 {isPublished ? 'Published Article' : 'Draft Article'}
               </strong>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => setStep('config')}
                 leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
               >
                 Re-configure
               </Button>
+
+              {onApplyGenerated && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    if (generatedBlog) {
+                      onApplyGenerated(generatedBlog, thumbnailPreviewUrl, categoryId);
+                      handleResetAndClose();
+                    }
+                  }}
+                  className="border-lavender-500/30 text-lavender-200 hover:bg-lavender-500/20"
+                >
+                  <FileText className="w-4 h-4 mr-1.5 text-lavender-400" />
+                  Apply to Editor Page
+                </Button>
+              )}
+
               <Button
                 onClick={handleSaveToDatabase}
                 isLoading={isSaving}
+                size="sm"
                 leftIcon={<Save className="w-4 h-4" />}
               >
-                {isSaving ? 'Saving to Database...' : 'Save & Add to Blogs'}
+                {isSaving ? 'Saving...' : 'Save Directly to DB'}
               </Button>
             </div>
           </div>

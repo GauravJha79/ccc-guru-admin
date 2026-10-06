@@ -16,6 +16,7 @@ import { CourseEnrollmentsPage } from '../pages/courses/CourseEnrollmentsPage';
 import { CoursePaymentsPage } from '../pages/courses/CoursePaymentsPage';
 import { TestCategoriesPage } from '../pages/tests/TestCategoriesPage';
 import { TestSeriesPage } from '../pages/tests/TestSeriesPage';
+import { TestSeriesEditorPage } from '../pages/tests/TestSeriesEditorPage';
 import { TestSeriesItemsPage } from '../pages/tests/TestSeriesItemsPage';
 import { ChaptersPage } from '../pages/chapters/ChaptersPage';
 import { QuestionBankPage } from '../pages/questions/QuestionBankPage';
@@ -23,6 +24,7 @@ import { NoteCategoriesPage } from '../pages/notes/NoteCategoriesPage';
 import { NotesPage } from '../pages/notes/NotesPage';
 import { BlogCategoriesPage } from '../pages/blogs/BlogCategoriesPage';
 import { BlogsPage } from '../pages/blogs/BlogsPage';
+import { BlogEditorPage } from '../pages/blogs/BlogEditorPage';
 import { BookCategoriesPage } from '../pages/books/BookCategoriesPage';
 import { BooksPage } from '../pages/books/BooksPage';
 import { EnrollmentsPage } from '../pages/enrollments/EnrollmentsPage';
@@ -58,6 +60,8 @@ export const AppRoutes: React.FC = () => {
         {/* Test Management */}
         <Route path={ROUTES.TEST_CATEGORIES} element={<TestCategoriesPage />} />
         <Route path={ROUTES.TEST_SERIES} element={<TestSeriesPage />} />
+        <Route path={ROUTES.TEST_SERIES_CREATE} element={<TestSeriesEditorPage />} />
+        <Route path={ROUTES.TEST_SERIES_EDIT} element={<TestSeriesEditorPage />} />
 
         <Route path={ROUTES.TEST_SERIES_ITEMS} element={<TestSeriesItemsPage />} />
 
@@ -72,6 +76,8 @@ export const AppRoutes: React.FC = () => {
         {/* Blogs */}
         <Route path={ROUTES.BLOG_CATEGORIES} element={<BlogCategoriesPage />} />
         <Route path={ROUTES.BLOGS} element={<BlogsPage />} />
+        <Route path={ROUTES.BLOG_CREATE} element={<BlogEditorPage />} />
+        <Route path={ROUTES.BLOG_EDIT} element={<BlogEditorPage />} />
 
         {/* Books & Affiliate */}
         <Route path={ROUTES.BOOK_CATEGORIES} element={<BookCategoriesPage />} />

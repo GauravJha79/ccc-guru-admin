@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS public.test_series (
     category_id UUID REFERENCES public.test_categories(id) ON DELETE SET NULL,
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(255) UNIQUE,
+    featured_image TEXT,
     description TEXT,
     description_md TEXT,
     is_featured BOOLEAN NOT NULL DEFAULT false,

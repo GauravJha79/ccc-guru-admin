@@ -47,6 +47,15 @@ export const blogService = {
     return [];
   },
 
+  async getBlogById(id: string): Promise<Blog | null> {
+    if (isSupabaseConfigured && supabase) {
+      const { data, error } = await supabase.from('blogs').select('*, category:blog_categories(*)').eq('id', id).maybeSingle();
+      if (error) throw error;
+      return data;
+    }
+    return null;
+  },
+
   async createBlog(payload: Omit<Blog, 'id' | 'created_at' | 'category'>): Promise<Blog> {
     if (isSupabaseConfigured && supabase) {
       const { data, error } = await supabase.from('blogs').insert(payload).select('*, category:blog_categories(*)').single();

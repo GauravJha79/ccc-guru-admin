@@ -9,6 +9,8 @@ export const ROUTES = {
   // Test Management
   TEST_CATEGORIES: '/tests/categories',
   TEST_SERIES: '/tests/series',
+  TEST_SERIES_CREATE: '/tests/series/new',
+  TEST_SERIES_EDIT: '/tests/series/edit/:id',
   TEST_SERIES_ITEMS: '/tests/items',
   TEST_ITEM_QUESTIONS: '/tests/items/:itemId/questions',
 

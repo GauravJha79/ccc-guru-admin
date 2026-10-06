@@ -25,6 +25,7 @@ export interface TestSeries {
   category_id: string;
   title: string;
   slug: string;
+  featured_image?: string | null;
   description?: string | null;
   description_md?: string | null;
   is_featured: boolean;

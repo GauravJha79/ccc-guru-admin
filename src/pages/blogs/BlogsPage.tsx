@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-  Plus,
   Edit2,
   Trash2,
   Eye,
   Calendar,
   User as UserIcon,
   Sparkles,
-  Palette,
-  Link as LinkIcon,
-  Upload,
-  Image as ImageIcon,
-  X,
+  Plus,
 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -22,20 +18,15 @@ import { SearchFilterBar } from '../../components/common/SearchFilterBar';
 import { Pagination } from '../../components/common/Pagination';
 import { Modal } from '../../components/common/Modal';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
-import { Input } from '../../components/common/Input';
-import { Textarea } from '../../components/common/Textarea';
-import { Select } from '../../components/common/Select';
-import { Switch } from '../../components/common/Switch';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
-import { FileUpload } from '../../components/common/FileUpload';
-import { RichTextEditor } from '../../components/common/RichTextEditor';
-import { formatDate, generateSlug } from '../../lib/utils';
+import { formatDate } from '../../lib/utils';
 import { APP_CONFIG } from '../../constants/config';
+import { ROUTES } from '../../constants/routes';
 import { AiBlogGenerateModal } from './AiBlogGenerateModal';
-import { geminiBlogService, BANNER_THEMES } from '../../services/geminiBlogService';
 
 export const BlogsPage: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { success, error: toastError } = useToast();
 
@@ -51,27 +42,8 @@ export const BlogsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(APP_CONFIG.DEFAULT_PAGE_SIZE);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
-  const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [previewBlog, setPreviewBlog] = useState<Blog | null>(null);
-  const [isGeneratingBanner, setIsGeneratingBanner] = useState(false);
-
-  // Form State
-  const [categoryId, setCategoryId] = useState('');
-  const [titleEn, setTitleEn] = useState('');
-  const [titleHi, setTitleHi] = useState('');
-  const [slug, setSlug] = useState('');
-  const [summaryEn, setSummaryEn] = useState('');
-  const [summaryHi, setSummaryHi] = useState('');
-  const [contentEn, setContentEn] = useState('');
-  const [contentHi, setContentHi] = useState('');
-  const [featuredImage, setFeaturedImage] = useState('');
-  const [imageInputMode, setImageInputMode] = useState<'upload' | 'url'>('upload');
-  const [author, setAuthor] = useState('');
-  const [isFeatured, setIsFeatured] = useState(false);
-  const [isPublished, setIsPublished] = useState(false);
-  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
   const [deleteTarget, setDeleteTarget] = useState<Blog | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -95,119 +67,6 @@ export const BlogsPage: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const handleTitleEnChange = (val: string) => {
-    setTitleEn(val);
-    if (!editingBlog) {
-      setSlug(generateSlug(val));
-    }
-  };
-
-  const openCreateModal = () => {
-    setEditingBlog(null);
-    setCategoryId(blogCategories[0]?.id || '');
-    setTitleEn('');
-    setTitleHi('');
-    setSlug('');
-    setSummaryEn('');
-    setSummaryHi('');
-    setContentEn('# Guide Title\n\nWrite article content with markdown formatting here...');
-    setContentHi('# गाइड का शीर्षक\n\nयहाँ हिंदी में लेख की सामग्री लिखें...');
-    setFeaturedImage('');
-    setAuthor(user?.name || 'CCC Prep Team');
-    setIsFeatured(false);
-    setIsPublished(false);
-    setFormErrors({});
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (blog: Blog) => {
-    setEditingBlog(blog);
-    setCategoryId(blog.category_id || '');
-    setTitleEn(blog.title_en);
-    setTitleHi(blog.title_hi);
-    setSlug(blog.slug);
-    setSummaryEn(blog.summary_en || '');
-    setSummaryHi(blog.summary_hi || '');
-    setContentEn(blog.content_en);
-    setContentHi(blog.content_hi);
-    setFeaturedImage(blog.featured_image || '');
-    setAuthor(blog.author);
-    setIsFeatured(blog.is_featured);
-    setIsPublished(blog.is_published);
-    setFormErrors({});
-    setIsModalOpen(true);
-  };
-
-  const handleGenerateThumbnailForForm = async () => {
-    if (!titleEn.trim()) {
-      toastError('Title Required', 'Please enter an English title before generating a banner.');
-      return;
-    }
-
-    setIsGeneratingBanner(true);
-    try {
-      const selectedCat = blogCategories.find((c) => c.id === categoryId);
-      const url = await geminiBlogService.generateAndUploadBanner(
-        titleEn.trim(),
-        selectedCat?.title || 'CCC Study Guide',
-        BANNER_THEMES[0]
-      );
-      setFeaturedImage(url);
-      success('Banner Generated', 'Created and attached high-resolution blog banner.');
-    } catch (err: any) {
-      toastError('Banner Failed', err.message || 'Could not generate banner image.');
-    } finally {
-      setIsGeneratingBanner(false);
-    }
-  };
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const errors: { [key: string]: string } = {};
-    if (!titleEn.trim()) errors.titleEn = 'English title is required.';
-    if (!titleHi.trim()) errors.titleHi = 'Hindi title is required.';
-    if (!slug.trim()) errors.slug = 'Slug identifier is required.';
-    if (!categoryId) errors.categoryId = 'Please select a category.';
-    if (!contentEn.trim()) errors.contentEn = 'English article content is required.';
-    if (!contentHi.trim()) errors.contentHi = 'Hindi article content is required.';
-
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
-
-    try {
-      const payload = {
-        category_id: categoryId,
-        title_en: titleEn.trim(),
-        title_hi: titleHi.trim(),
-        slug: slug.trim(),
-        summary_en: summaryEn.trim(),
-        summary_hi: summaryHi.trim(),
-        content_en: contentEn,
-        content_hi: contentHi,
-        featured_image: featuredImage || undefined,
-        author: author.trim() || user?.name || 'CCC Prep Team',
-        is_featured: isFeatured,
-        is_published: isPublished,
-        published_at: isPublished ? (editingBlog?.published_at || new Date().toISOString()) : undefined,
-      };
-
-      if (editingBlog) {
-        const updated = await blogService.updateBlog(editingBlog.id, payload);
-        setBlogs((prev) => prev.map((b) => (b.id === editingBlog.id ? { ...b, ...updated } : b)));
-        success('Article Updated', `Saved "${titleEn}"`);
-      } else {
-        const created = await blogService.createBlog(payload);
-        setBlogs((prev) => [created, ...prev]);
-        success('Article Created', `Published "${titleEn}"`);
-      }
-      setIsModalOpen(false);
-    } catch (err: any) {
-      toastError('Save Failed', err.message || 'Could not save article.');
-    }
-  };
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
@@ -268,12 +127,15 @@ export const BlogsPage: React.FC = () => {
       render: (item) => {
         const category = blogCategories.find((c) => c.id === item.category_id);
         return (
-          <div className="flex items-start gap-3 py-1">
+          <div
+            className="flex items-start gap-3 py-1 cursor-pointer group"
+            onClick={() => navigate(`/blogs/edit/${item.id}`)}
+          >
             {item.featured_image ? (
               <img
                 src={item.featured_image}
                 alt=""
-                className="w-12 h-12 rounded-xl object-cover border border-lavender-500/20 flex-shrink-0"
+                className="w-12 h-12 rounded-xl object-cover border border-lavender-500/20 flex-shrink-0 group-hover:border-lavender-500/50 transition-colors"
               />
             ) : (
               <div className="w-12 h-12 rounded-xl bg-lavender-500/10 border border-lavender-500/20 flex items-center justify-center text-lavender-400 font-bold text-xs flex-shrink-0">
@@ -282,7 +144,9 @@ export const BlogsPage: React.FC = () => {
             )}
             <div className="space-y-0.5 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-white text-sm truncate">{item.title_en}</span>
+                <span className="font-bold text-white text-sm truncate group-hover:text-lavender-300 transition-colors">
+                  {item.title_en}
+                </span>
                 {item.is_featured && (
                   <Badge variant="primary" size="sm">
                     Featured
@@ -348,9 +212,9 @@ export const BlogsPage: React.FC = () => {
             <Eye className="w-4 h-4" />
           </button>
           <button
-            onClick={() => openEditModal(item)}
+            onClick={() => navigate(`/blogs/edit/${item.id}`)}
             className="p-1.5 text-dark-muted hover:text-lavender-300 hover:bg-lavender-500/10 rounded-lg transition-colors"
-            title="Edit Article"
+            title="Edit Article in Studio"
           >
             <Edit2 className="w-4 h-4" />
           </button>
@@ -422,7 +286,7 @@ export const BlogsPage: React.FC = () => {
         }
         actionButton={{
           label: 'Write Article',
-          onClick: openCreateModal,
+          onClick: () => navigate(ROUTES.BLOG_CREATE),
         }}
       />
 
@@ -435,7 +299,7 @@ export const BlogsPage: React.FC = () => {
           emptyTitle="No articles found in Supabase"
           emptyDescription="Write and publish exam notifications, study tips, and guide articles."
           emptyActionText="Write Article"
-          onEmptyAction={openCreateModal}
+          onEmptyAction={() => navigate(ROUTES.BLOG_CREATE)}
         />
         <Pagination
           currentPage={currentPage}
@@ -447,238 +311,6 @@ export const BlogsPage: React.FC = () => {
         />
       </div>
 
-      {/* Write / Edit Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        size="2xl"
-        title={editingBlog ? 'Edit Article' : 'Write New Article'}
-        subtitle="Compose bilingual articles with Markdown and Supabase Storage images"
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave}>
-              {editingBlog ? 'Save Changes' : 'Save Article'}
-            </Button>
-          </>
-        }
-      >
-        <form onSubmit={handleSave} className="space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Select
-              label="Article Category"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              options={blogCategories.map((c) => ({ value: c.id, label: c.title }))}
-              error={formErrors.categoryId}
-              required
-            />
-            <Input
-              label="URL Slug"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              error={formErrors.slug}
-              placeholder="ccc-2026-exam-tips"
-              required
-            />
-            <Input
-              label="Author Name"
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-              placeholder="Admin Team"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Article Title (English)"
-              placeholder="e.g. How to Pass CCC Exam on First Attempt in 2026"
-              value={titleEn}
-              onChange={(e) => handleTitleEnChange(e.target.value)}
-              error={formErrors.titleEn}
-              required
-            />
-            <Input
-              label="लेख का शीर्षक (Hindi)"
-              placeholder="उदा. 2026 में पहली बार में CCC परीक्षा कैसे पास करें"
-              value={titleHi}
-              onChange={(e) => setTitleHi(e.target.value)}
-              error={formErrors.titleHi}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Textarea
-              label="Short Summary (English)"
-              placeholder="Brief preview snippet shown on card..."
-              value={summaryEn}
-              onChange={(e) => setSummaryEn(e.target.value)}
-              rows={2}
-            />
-            <Textarea
-              label="संक्षिप्त सारांश (Hindi)"
-              placeholder="कार्ड पर दिखाया जाने वाला संक्षिप्त विवरण..."
-              value={summaryHi}
-              onChange={(e) => setSummaryHi(e.target.value)}
-              rows={2}
-            />
-          </div>
-
-          <div className="space-y-3 p-4 rounded-2xl bg-background-elevated/40 border border-dark-border">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-white">
-                  Featured Banner Image
-                </span>
-                <span className="text-[10px] text-dark-muted font-normal">(Optional)</span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {/* Mode Selector Tabs */}
-                <div className="flex items-center bg-background rounded-lg p-0.5 border border-dark-border text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setImageInputMode('upload')}
-                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
-                      imageInputMode === 'upload'
-                        ? 'bg-lavender-500 text-white font-medium shadow-sm'
-                        : 'text-dark-muted hover:text-white'
-                    }`}
-                  >
-                    <Upload className="w-3 h-3" />
-                    <span>Upload File</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setImageInputMode('url')}
-                    className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
-                      imageInputMode === 'url'
-                        ? 'bg-lavender-500 text-white font-medium shadow-sm'
-                        : 'text-dark-muted hover:text-white'
-                    }`}
-                  >
-                    <LinkIcon className="w-3 h-3" />
-                    <span>Paste Image URL</span>
-                  </button>
-                </div>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleGenerateThumbnailForForm}
-                  isLoading={isGeneratingBanner}
-                  leftIcon={<Sparkles className="w-3.5 h-3.5 text-lavender-400" />}
-                  className="text-xs py-1"
-                >
-                  {isGeneratingBanner ? 'Generating...' : '✨ Generate AI Banner'}
-                </Button>
-              </div>
-            </div>
-
-            {/* Upload Mode */}
-            {imageInputMode === 'upload' && (
-              <FileUpload
-                bucket={APP_CONFIG.STORAGE_BUCKETS.BLOG_IMAGES}
-                type="image"
-                accept="image/*"
-                value={featuredImage}
-                onChange={(url) => setFeaturedImage(url)}
-                helperText="Upload image to Supabase Storage, or switch to 'Paste Image URL' for external links."
-              />
-            )}
-
-            {/* Direct URL Paste Mode */}
-            {imageInputMode === 'url' && (
-              <div className="space-y-3">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Paste direct image URL e.g. https://images.unsplash.com/photo-... or external bucket link"
-                    value={featuredImage}
-                    onChange={(e) => setFeaturedImage(e.target.value.trim())}
-                    className="flex-1"
-                  />
-                  {featuredImage && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setFeaturedImage('')}
-                      className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 shrink-0"
-                    >
-                      <X className="w-4 h-4 mr-1" />
-                      Clear
-                    </Button>
-                  )}
-                </div>
-
-                {/* Live Preview of Pasted URL */}
-                {featuredImage && (
-                  <div className="p-2.5 rounded-xl bg-background border border-dark-border/80 flex items-center gap-3">
-                    <div className="w-24 h-16 rounded-lg overflow-hidden border border-dark-border bg-dark-bg shrink-0">
-                      <img
-                        src={featuredImage}
-                        alt="Banner Preview"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%23f43f5e" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
-                        }}
-                      />
-                    </div>
-                    <div className="space-y-1 flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <ImageIcon className="w-3.5 h-3.5 text-lavender-400" />
-                        <span className="text-xs font-semibold text-white">External Image Linked</span>
-                        <Badge variant="success" size="sm">
-                          Active URL
-                        </Badge>
-                      </div>
-                      <p className="text-[11px] text-dark-muted font-mono truncate">
-                        {featuredImage}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <RichTextEditor
-              label="Full Article Content (English) *"
-              value={contentEn}
-              onChange={setContentEn}
-              placeholder="Type markdown or rich text..."
-            />
-            <RichTextEditor
-              label="सम्पूर्ण लेख सामग्री (Hindi) *"
-              value={contentHi}
-              onChange={setContentHi}
-              placeholder="यहाँ हिंदी में विस्तृत लेख लिखें..."
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-            <Switch
-              checked={isFeatured}
-              onChange={setIsFeatured}
-              label="Featured Article"
-              description="Displays in the top carousel on the mobile app."
-            />
-            <Switch
-              checked={isPublished}
-              onChange={setIsPublished}
-              label="Published Status"
-              description="Make article immediately accessible to mobile users."
-            />
-          </div>
-        </form>
-      </Modal>
-
       {/* Article Live Preview Modal */}
       {previewBlog && (
         <Modal
@@ -688,12 +320,26 @@ export const BlogsPage: React.FC = () => {
           title={previewBlog.title_en}
           subtitle={`By ${previewBlog.author} • /${previewBlog.slug}`}
           footer={
-            <Button variant="secondary" onClick={() => setPreviewBlog(null)}>
-              Close Preview
-            </Button>
+            <div className="flex items-center justify-between w-full">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const idToEdit = previewBlog.id;
+                  setPreviewBlog(null);
+                  navigate(`/blogs/edit/${idToEdit}`);
+                }}
+                leftIcon={<Edit2 className="w-3.5 h-3.5" />}
+              >
+                Edit in Full Page Studio
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => setPreviewBlog(null)}>
+                Close Preview
+              </Button>
+            </div>
           }
         >
-          <div className="space-y-6">
+          <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-1">
             {previewBlog.featured_image && (
               <img
                 src={previewBlog.featured_image}

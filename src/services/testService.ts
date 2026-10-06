@@ -47,6 +47,15 @@ export const testService = {
     return [];
   },
 
+  async getSeriesById(id: string): Promise<TestSeries | null> {
+    if (isSupabaseConfigured && supabase) {
+      const { data, error } = await supabase.from('test_series').select('*, category:test_categories(*)').eq('id', id).maybeSingle();
+      if (error) throw error;
+      return data;
+    }
+    return null;
+  },
+
   async createSeries(payload: Omit<TestSeries, 'id' | 'created_at' | 'last_updated_at' | 'updated_at' | 'category'>): Promise<TestSeries> {
     if (isSupabaseConfigured && supabase) {
       const { data, error } = await supabase.from('test_series').insert(payload).select('*, category:test_categories(*)').single();

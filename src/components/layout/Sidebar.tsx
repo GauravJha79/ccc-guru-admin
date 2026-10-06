@@ -220,7 +220,11 @@ export const Sidebar: React.FC<{ onCloseMobile?: () => void }> = ({
               </p>
               {section.items.map((item) => {
                 if (item.superAdminOnly && !isSuperAdmin) return null;
-                const isActive = location.pathname === item.path;
+                const isActive =
+                  location.pathname === item.path ||
+                  (item.path !== '/' &&
+                    item.path !== ROUTES.DASHBOARD &&
+                    location.pathname.startsWith(item.path));
 
                 return (
                   <NavLink

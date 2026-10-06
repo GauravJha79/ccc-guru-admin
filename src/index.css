@@ -116,20 +116,15 @@
     background-color: #F8FAFC !important;
   }
 
-  /* Custom smooth scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  /* Button icon and text inline alignment */
+  button, .btn {
+    white-space: nowrap;
   }
-  ::-webkit-scrollbar-track {
-    background: var(--scrollbar-track);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb);
-    border-radius: 9999px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #9D8CFC;
+
+  button svg, .btn svg {
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: middle;
   }
 }
 
@@ -174,3 +169,112 @@
     -webkit-text-fill-color: transparent;
   }
 }
+
+/* ==========================================================================
+   MDXEditor Dark Theme Polish & Typography
+   ========================================================================== */
+.mdx-dark-container .mdxeditor {
+  background-color: transparent !important;
+  color: #F1F5F9;
+  font-family: inherit;
+}
+
+.mdx-dark-container .mdxeditor [role="toolbar"] {
+  background-color: #131622 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 6px 8px !important;
+  gap: 4px;
+}
+
+.mdx-dark-container .mdxeditor button[type="button"] {
+  color: #94A3B8;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.mdx-dark-container .mdxeditor button[type="button"]:hover {
+  background-color: rgba(157, 140, 252, 0.12) !important;
+  color: #E2E8F0 !important;
+}
+
+.mdx-dark-container .mdxeditor button[data-state="on"],
+.mdx-dark-container .mdxeditor button[aria-pressed="true"],
+.mdx-dark-container .mdxeditor button[data-active="true"] {
+  background-color: rgba(157, 140, 252, 0.25) !important;
+  color: #C4B5FD !important;
+}
+
+.mdx-dark-container .mdxeditor select,
+.mdx-dark-container .mdxeditor [role="combobox"] {
+  background-color: #1A1D2D !important;
+  color: #E2E8F0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px !important;
+}
+
+.mdx-dark-container .mdxeditor .prose {
+  color: #E2E8F0;
+}
+
+.mdx-dark-container .mdxeditor .prose h1 {
+  color: #FFFFFF;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.mdx-dark-container .mdxeditor .prose h2 {
+  color: #F8FAFC;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.mdx-dark-container .mdxeditor .prose h3 {
+  color: #E2E8F0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.mdx-dark-container .mdxeditor .prose p {
+  color: #CBD5E1;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+.mdx-dark-container .mdxeditor .prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.mdx-dark-container .mdxeditor .prose th {
+  background-color: #1E2235;
+  color: #A5B4FC;
+  font-weight: 600;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.mdx-dark-container .mdxeditor .prose td {
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #CBD5E1;
+}
+
+.mdx-dark-container .mdxeditor .prose blockquote {
+  border-left: 3px solid #9D8CFC;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #CBD5E1;
+  background-color: rgba(157, 140, 252, 0.05);
+  border-radius: 0 8px 8px 0;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
