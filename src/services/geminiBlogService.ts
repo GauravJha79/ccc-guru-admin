@@ -1,6 +1,6 @@
 import { generateSlug } from '../lib/utils';
 import { getGeminiApiKey } from './geminiService';
-import { uploadFileToSupabase } from '../lib/storage';
+import { uploadAssetToHygraph } from './hygraphAssetService';
 
 export interface GenerateBlogParams {
   topic: string;
@@ -439,9 +439,10 @@ Return ONLY a valid JSON object matching this schema. Do not wrap in markdown ou
               const file = new File([blob], fileName, { type: mime });
 
               try {
-                const uploadRes = await uploadFileToSupabase('blogs', 'thumbnails', file);
+                const uploadRes = await uploadAssetToHygraph(file);
                 return { url: uploadRes.url, type: 'nano_banana_realistic' };
               } catch (e) {
+                console.warn('Hygraph upload failed for Nano Banana banner, falling back to data URL:', e);
                 return { url: `data:${mime};base64,${base64}`, type: 'nano_banana_realistic' };
               }
             }
@@ -487,9 +488,10 @@ Return ONLY a valid JSON object matching this schema. Do not wrap in markdown ou
         const file = new File([blob], fileName, { type: mime });
 
         try {
-          const uploadRes = await uploadFileToSupabase('blogs', 'thumbnails', file);
+          const uploadRes = await uploadAssetToHygraph(file);
           return { url: uploadRes.url, type: 'nano_banana_realistic' };
         } catch (e) {
+          console.warn('Hygraph upload failed for Imagen 3 banner, falling back to data URL:', e);
           return { url: `data:${mime};base64,${base64}`, type: 'nano_banana_realistic' };
         }
       }
@@ -716,10 +718,10 @@ Return ONLY a valid JSON object matching this schema. Do not wrap in markdown ou
     const file = new File([blob], fileName, { type: 'image/png' });
 
     try {
-      const result = await uploadFileToSupabase('blogs', 'thumbnails', file);
+      const result = await uploadAssetToHygraph(file);
       return result.url;
     } catch (e) {
-      console.warn('Direct Supabase banner upload fallback to Data URL:', e);
+      console.warn('Direct Hygraph banner upload fallback to Data URL:', e);
       return dataUrl;
     }
   },

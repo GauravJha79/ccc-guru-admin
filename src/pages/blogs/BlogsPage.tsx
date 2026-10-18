@@ -7,11 +7,16 @@ import {
   Calendar,
   User as UserIcon,
   Sparkles,
-  Plus,
+  Globe,
+  Languages,
+  Link2,
+  AlertCircle,
+  ExternalLink,
+  PlusCircle,
 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Blog, BlogCategory } from '../../types/database';
+import { Blog, BlogCategory, ArticleLanguage } from '../../types/database';
 import { blogService } from '../../services/blogService';
 import { DataTable, Column } from '../../components/common/DataTable';
 import { SearchFilterBar } from '../../components/common/SearchFilterBar';
@@ -38,6 +43,8 @@ export const BlogsPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [publishedFilter, setPublishedFilter] = useState('');
   const [featuredFilter, setFeaturedFilter] = useState('');
+  const [languageFilter, setLanguageFilter] = useState<string>('');
+  const [translationFilter, setTranslationFilter] = useState<string>('');
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(APP_CONFIG.DEFAULT_PAGE_SIZE);
@@ -47,6 +54,7 @@ export const BlogsPage: React.FC = () => {
 
   const [deleteTarget, setDeleteTarget] = useState<Blog | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCreatingDraft, setIsCreatingDraft] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -74,7 +82,10 @@ export const BlogsPage: React.FC = () => {
     try {
       await blogService.deleteBlog(deleteTarget.id);
       setBlogs((prev) => prev.filter((b) => b.id !== deleteTarget.id));
-      success('Article Deleted', `"${deleteTarget.title_en}" was removed.`);
+      success(
+        'Article Removed',
+        `"${deleteTarget.title}" was removed from Hygraph. Translated counterpart preserved.`
+      );
       setDeleteTarget(null);
     } catch (err: any) {
       toastError('Delete Failed', err.message || 'Could not delete article.');
@@ -91,27 +102,60 @@ export const BlogsPage: React.FC = () => {
         published_at: nextStatus ? (blog.published_at || new Date().toISOString()) : undefined,
       });
       setBlogs((prev) => prev.map((b) => (b.id === blog.id ? { ...b, ...updated } : b)));
-      success(nextStatus ? 'Article Published' : 'Article Set to Draft', blog.title_en);
+      success(nextStatus ? 'Article Published Live' : 'Article Moved to Draft', blog.title);
     } catch (err: any) {
       toastError('Update Failed', err.message);
+    }
+  };
+
+  const handleCreateTranslationDraft = async (sourceBlog: Blog) => {
+    setIsCreatingDraft(true);
+    try {
+      const targetLang = sourceBlog.language === 'EN' ? 'Hindi' : 'English';
+      const newDraft = await blogService.createTranslationDraft(sourceBlog.id);
+      success(
+        'Translation Draft Created',
+        `Created new ${targetLang} draft. Opening editor studio...`
+      );
+      navigate(`/blogs/edit/${newDraft.id}`);
+    } catch (err: any) {
+      toastError('Draft Creation Failed', err.message);
+    } finally {
+      setIsCreatingDraft(false);
     }
   };
 
   const filteredBlogs = blogs.filter((b) => {
     const query = searchQuery.toLowerCase();
     const matchSearch =
-      b.title_en.toLowerCase().includes(query) ||
-      b.title_hi.toLowerCase().includes(query) ||
+      b.title.toLowerCase().includes(query) ||
       b.slug.toLowerCase().includes(query) ||
-      b.author.toLowerCase().includes(query);
+      b.author.toLowerCase().includes(query) ||
+      (b.title_en && b.title_en.toLowerCase().includes(query)) ||
+      (b.title_hi && b.title_hi.toLowerCase().includes(query));
 
     const matchCategory = categoryFilter === '' ? true : b.category_id === categoryFilter;
     const matchPublished =
       publishedFilter === '' ? true : publishedFilter === 'published' ? b.is_published : !b.is_published;
     const matchFeatured =
       featuredFilter === '' ? true : featuredFilter === 'featured' ? b.is_featured : !b.is_featured;
+    const matchLanguage =
+      languageFilter === '' ? true : b.language === languageFilter;
+    const matchTranslation =
+      translationFilter === ''
+        ? true
+        : translationFilter === 'linked'
+        ? Boolean(b.linked_translation)
+        : !b.linked_translation;
 
-    return matchSearch && matchCategory && matchPublished && matchFeatured;
+    return (
+      matchSearch &&
+      matchCategory &&
+      matchPublished &&
+      matchFeatured &&
+      matchLanguage &&
+      matchTranslation
+    );
   });
 
   const totalPages = Math.ceil(filteredBlogs.length / pageSize);
@@ -126,6 +170,7 @@ export const BlogsPage: React.FC = () => {
       header: 'Article Title & Category',
       render: (item) => {
         const category = blogCategories.find((c) => c.id === item.category_id);
+        const urlPrefix = item.language === 'EN' ? '/en/blogs/' : '/hi/blogs/';
         return (
           <div
             className="flex items-start gap-3 py-1 cursor-pointer group"
@@ -142,10 +187,19 @@ export const BlogsPage: React.FC = () => {
                 BLOG
               </div>
             )}
-            <div className="space-y-0.5 min-w-0">
+            <div className="space-y-1 min-w-0">
               <div className="flex items-center gap-2">
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
+                    item.language === 'EN'
+                      ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  }`}
+                >
+                  {item.language === 'EN' ? 'English (en)' : 'हिन्दी (hi)'}
+                </span>
                 <span className="font-bold text-white text-sm truncate group-hover:text-lavender-300 transition-colors">
-                  {item.title_en}
+                  {item.title}
                 </span>
                 {item.is_featured && (
                   <Badge variant="primary" size="sm">
@@ -153,12 +207,75 @@ export const BlogsPage: React.FC = () => {
                   </Badge>
                 )}
               </div>
-              <p className="text-xs text-lavender-300 font-medium truncate">{item.title_hi}</p>
               <div className="flex items-center gap-2 text-[11px] text-dark-muted">
-                <span>{category?.title || 'General'}</span>
+                <span className="text-lavender-400 font-medium">{category?.title || 'General'}</span>
                 <span>•</span>
-                <span className="font-mono text-dark-dim">/{item.slug}</span>
+                <span className="font-mono text-dark-dim">
+                  {urlPrefix}
+                  <span className="text-white/80">{item.slug}</span>
+                </span>
               </div>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: 'translation_status',
+      header: 'Translation Status',
+      width: '240px',
+      render: (item) => {
+        const isEnglish = item.language === 'EN';
+        const counterpartLang = isEnglish ? 'Hindi' : 'English';
+
+        if (item.linked_translation) {
+          return (
+            <div
+              className="p-2 rounded-xl bg-background-elevated/80 border border-dark-border space-y-1 group hover:border-lavender-500/30 transition-colors cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/blogs/edit/${item.linked_translation!.id}`);
+              }}
+              title={`Click to edit ${counterpartLang} translation`}
+            >
+              <div className="flex items-center justify-between gap-1 text-[11px]">
+                <span className="flex items-center gap-1 font-semibold text-emerald-400">
+                  <Link2 className="w-3 h-3" />
+                  {counterpartLang} Linked
+                </span>
+                <Badge
+                  variant={item.linked_translation.is_published ? 'success' : 'neutral'}
+                  size="sm"
+                >
+                  {item.linked_translation.is_published ? 'Live' : 'Draft'}
+                </Badge>
+              </div>
+              <p className="text-[11px] text-white/90 truncate font-medium group-hover:text-lavender-300 transition-colors">
+                {item.linked_translation.title}
+              </p>
+            </div>
+          );
+        }
+
+        return (
+          <div className="space-y-1.5 py-0.5">
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-400/90 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20">
+              <AlertCircle className="w-3 h-3" />
+              {counterpartLang} Missing
+            </span>
+            <div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCreateTranslationDraft(item);
+                }}
+                disabled={isCreatingDraft}
+                className="text-[11px] text-lavender-400 hover:text-lavender-300 hover:underline flex items-center gap-1 font-medium transition-colors"
+              >
+                <PlusCircle className="w-3 h-3" />
+                <span>+ Create {counterpartLang} Translation</span>
+              </button>
             </div>
           </div>
         );
@@ -183,16 +300,16 @@ export const BlogsPage: React.FC = () => {
     },
     {
       key: 'is_published',
-      header: 'Status',
+      header: 'Publish Status',
       width: '130px',
       render: (item) => (
         <button
           onClick={() => handleTogglePublish(item)}
           className="group cursor-pointer text-left"
-          title="Click to toggle publish status"
+          title="Click to toggle publish status in Hygraph"
         >
           <Badge variant={item.is_published ? 'success' : 'neutral'} dot>
-            {item.is_published ? 'Published' : 'Draft'}
+            {item.is_published ? 'Published Live' : 'Draft'}
           </Badge>
         </button>
       ),
@@ -207,7 +324,7 @@ export const BlogsPage: React.FC = () => {
           <button
             onClick={() => setPreviewBlog(item)}
             className="p-1.5 text-dark-muted hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-            title="Preview Article"
+            title="Preview Article & Translations"
           >
             <Eye className="w-4 h-4" />
           </button>
@@ -238,6 +355,26 @@ export const BlogsPage: React.FC = () => {
         searchPlaceholder="Search blogs by title, slug, or author..."
         filters={[
           {
+            key: 'language',
+            label: 'Language',
+            value: languageFilter,
+            options: [
+              { value: 'EN', label: 'English Only' },
+              { value: 'HI', label: 'हिन्दी Only' },
+            ],
+            onChange: setLanguageFilter,
+          },
+          {
+            key: 'translation',
+            label: 'Translation',
+            value: translationFilter,
+            options: [
+              { value: 'linked', label: 'Linked Translations' },
+              { value: 'missing', label: 'Missing Translation' },
+            ],
+            onChange: setTranslationFilter,
+          },
+          {
             key: 'category',
             label: 'Category',
             value: categoryFilter,
@@ -266,13 +403,20 @@ export const BlogsPage: React.FC = () => {
           },
         ]}
         hasActiveFilters={Boolean(
-          searchQuery || categoryFilter || publishedFilter || featuredFilter
+          searchQuery ||
+            categoryFilter ||
+            publishedFilter ||
+            featuredFilter ||
+            languageFilter ||
+            translationFilter
         )}
         onClearFilters={() => {
           setSearchQuery('');
           setCategoryFilter('');
           setPublishedFilter('');
           setFeaturedFilter('');
+          setLanguageFilter('');
+          setTranslationFilter('');
         }}
         extraActions={
           <Button
@@ -296,8 +440,8 @@ export const BlogsPage: React.FC = () => {
           data={paginatedBlogs}
           keyExtractor={(item) => item.id}
           isLoading={loading}
-          emptyTitle="No articles found in Supabase"
-          emptyDescription="Write and publish exam notifications, study tips, and guide articles."
+          emptyTitle="No articles found in Hygraph"
+          emptyDescription="Write and publish exam notifications, study tips, and multilingual guides."
           emptyActionText="Write Article"
           onEmptyAction={() => navigate(ROUTES.BLOG_CREATE)}
         />
@@ -317,8 +461,8 @@ export const BlogsPage: React.FC = () => {
           isOpen={Boolean(previewBlog)}
           onClose={() => setPreviewBlog(null)}
           size="2xl"
-          title={previewBlog.title_en}
-          subtitle={`By ${previewBlog.author} • /${previewBlog.slug}`}
+          title={previewBlog.title}
+          subtitle={`Language: ${previewBlog.language === 'EN' ? 'English (/en/blogs/)' : 'हिन्दी (/hi/blogs/)'} • By ${previewBlog.author} • /${previewBlog.slug}`}
           footer={
             <div className="flex items-center justify-between w-full">
               <Button
@@ -343,31 +487,79 @@ export const BlogsPage: React.FC = () => {
             {previewBlog.featured_image && (
               <img
                 src={previewBlog.featured_image}
-                alt=""
+                alt={previewBlog.featured_image_alt || ''}
                 className="w-full h-56 object-cover rounded-2xl border border-lavender-500/20 shadow-md"
               />
             )}
 
             <div className="space-y-2 border-b border-dark-border pb-4">
-              <h2 className="text-xl font-bold text-white">{previewBlog.title_en}</h2>
-              <p className="text-base font-medium text-lavender-300">{previewBlog.title_hi}</p>
+              <div className="flex items-center gap-2">
+                <Badge variant={previewBlog.language === 'EN' ? 'primary' : 'success'}>
+                  {previewBlog.language === 'EN' ? 'English Article' : 'हिंदी लेख'}
+                </Badge>
+                <Badge variant={previewBlog.is_published ? 'success' : 'neutral'} dot>
+                  {previewBlog.is_published ? 'Published' : 'Draft'}
+                </Badge>
+              </div>
+              <h2 className="text-xl font-bold text-white">{previewBlog.title}</h2>
+              {previewBlog.excerpt && (
+                <p className="text-sm text-dark-muted">{previewBlog.excerpt}</p>
+              )}
             </div>
+
+            {/* Translation Link Notice */}
+            {previewBlog.linked_translation ? (
+              <div className="p-3.5 rounded-xl bg-lavender-500/10 border border-lavender-500/30 flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <span className="text-[11px] uppercase tracking-wider font-bold text-lavender-400">
+                    Linked {previewBlog.linked_translation.language === 'EN' ? 'English' : 'Hindi'} Translation:
+                  </span>
+                  <p className="text-sm font-semibold text-white">
+                    {previewBlog.linked_translation.title}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const id = previewBlog.linked_translation!.id;
+                    setPreviewBlog(null);
+                    navigate(`/blogs/edit/${id}`);
+                  }}
+                  leftIcon={<ExternalLink className="w-3.5 h-3.5" />}
+                >
+                  View Translation
+                </Button>
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-amber-300">
+                    No {previewBlog.language === 'EN' ? 'Hindi' : 'English'} translation linked.
+                  </span>
+                  <p className="text-[11px] text-dark-muted">
+                    This article is currently an independent single-language post.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    handleCreateTranslationDraft(previewBlog);
+                    setPreviewBlog(null);
+                  }}
+                >
+                  Create Translation
+                </Button>
+              </div>
+            )}
 
             <div className="p-4 rounded-2xl bg-background-elevated/50 border border-dark-border space-y-4">
               <span className="text-xs font-bold uppercase tracking-wider text-dark-muted">
-                English Content
+                Article Content (Markdown)
               </span>
               <div className="prose prose-invert prose-lavender max-w-none text-sm text-dark-text whitespace-pre-line">
-                {previewBlog.content_en}
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-background-elevated/50 border border-dark-border space-y-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-lavender-400">
-                हिंदी सामग्री
-              </span>
-              <div className="prose prose-invert prose-lavender max-w-none text-sm text-dark-text whitespace-pre-line">
-                {previewBlog.content_hi}
+                {previewBlog.content}
               </div>
             </div>
           </div>
@@ -380,7 +572,7 @@ export const BlogsPage: React.FC = () => {
         onConfirm={handleConfirmDelete}
         isLoading={isDeleting}
         title="Delete Article"
-        message={`Are you sure you want to permanently delete "${deleteTarget?.title_en}" from Supabase?`}
+        message={`Are you sure you want to permanently delete "${deleteTarget?.title}" from Hygraph? Note: Deleting this article will NOT delete or break its translated counterpart.`}
       />
 
       <AiBlogGenerateModal

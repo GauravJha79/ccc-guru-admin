@@ -12,19 +12,24 @@ import {
   codeBlockPlugin,
   codeMirrorPlugin,
   diffSourcePlugin,
+  imagePlugin,
   toolbarPlugin,
   UndoRedo,
   BoldItalicUnderlineToggles,
+  StrikeThroughSupSubToggles,
   BlockTypeSelect,
   CreateLink,
+  InsertImage,
   InsertTable,
   InsertThematicBreak,
   InsertCodeBlock,
   ListsToggle,
+  Separator,
   DiffSourceToggleWrapper,
   type MDXEditorMethods,
 } from '@mdxeditor/editor';
 import '@mdxeditor/editor/style.css';
+import { uploadAssetToHygraph } from '../../services/hygraphAssetService';
 
 export interface MDXEditorComponentProps {
   value: string;
@@ -33,15 +38,17 @@ export interface MDXEditorComponentProps {
   placeholder?: string;
   helperText?: string;
   minHeight?: string;
+  variant?: 'card' | 'document';
 }
 
 export const MDXEditorComponent: React.FC<MDXEditorComponentProps> = ({
   value,
   onChange,
   label,
-  placeholder = 'Write in Markdown format or generate with AI...',
+  placeholder = 'Write your article here or use markdown formatting...',
   helperText,
   minHeight = '360px',
+  variant = 'card',
 }) => {
   const editorRef = useRef<MDXEditorMethods>(null);
 
@@ -63,9 +70,21 @@ export const MDXEditorComponent: React.FC<MDXEditorComponentProps> = ({
     }
   }, [sanitizedValue]);
 
+  const handleImageUpload = async (imageFile: File): Promise<string> => {
+    try {
+      const result = await uploadAssetToHygraph(imageFile);
+      return result.url;
+    } catch (err: any) {
+      console.error('Failed to upload image from MDXEditor to Hygraph:', err);
+      throw err;
+    }
+  };
+
+  const isDocument = variant === 'document';
+
   return (
-    <div className="w-full space-y-2">
-      {label && (
+    <div className={`w-full ${isDocument ? 'h-full flex-1 min-h-0 flex flex-col overflow-hidden' : 'space-y-2'}`}>
+      {label && !isDocument && (
         <div className="flex items-center justify-between">
           <label className="block text-xs font-semibold uppercase tracking-wider text-dark-muted">
             {label}
@@ -78,16 +97,26 @@ export const MDXEditorComponent: React.FC<MDXEditorComponentProps> = ({
       )}
 
       <div
-        className="mdx-dark-container rounded-2xl overflow-hidden border border-dark-border focus-within:border-lavender-500 transition-colors shadow-inner bg-[#0D0F17]"
-        style={{ minHeight }}
+        className={`mdx-dark-container dark-theme ${
+          isDocument
+            ? 'flex-1 min-h-0 flex flex-col h-full overflow-hidden bg-transparent border-none'
+            : 'rounded-2xl overflow-hidden border border-dark-border focus-within:border-lavender-500 transition-colors shadow-inner bg-[#0D0F17]'
+        }`}
+        style={!isDocument ? { minHeight } : undefined}
       >
         <MDXEditor
           ref={editorRef}
           markdown={value || ''}
           onChange={onChange}
           placeholder={placeholder}
-          className="dark-theme dark-editor text-white"
-          contentEditableClassName="prose prose-invert max-w-none text-sm leading-relaxed p-4 min-h-[300px] focus:outline-none"
+          className={`dark-theme dark-editor text-white ${
+            isDocument ? 'mdxeditor-full-height document-editor-root flex-1 min-h-0 flex flex-col h-full overflow-hidden' : ''
+          }`}
+          contentEditableClassName={`prose prose-invert text-slate-200 focus:outline-none ${
+            isDocument
+              ? 'text-base leading-relaxed py-8 px-4 w-full max-w-4xl min-h-[500px]'
+              : 'text-sm leading-relaxed p-4 min-h-[300px]'
+          }`}
           plugins={[
             headingsPlugin(),
             listsPlugin(),
@@ -96,6 +125,10 @@ export const MDXEditorComponent: React.FC<MDXEditorComponentProps> = ({
             tablePlugin(),
             linkPlugin(),
             linkDialogPlugin(),
+            imagePlugin({
+              imageUploadHandler: handleImageUpload,
+              allowSetImageDimensions: true,
+            }),
             codeBlockPlugin({ defaultCodeBlockLanguage: 'js' }),
             codeMirrorPlugin({
               codeBlockLanguages: {
@@ -105,6 +138,7 @@ export const MDXEditorComponent: React.FC<MDXEditorComponentProps> = ({
                 css: 'CSS',
                 sql: 'SQL',
                 json: 'JSON',
+                python: 'Python',
               },
             }),
             diffSourcePlugin({ viewMode: 'rich-text' }),
@@ -113,10 +147,14 @@ export const MDXEditorComponent: React.FC<MDXEditorComponentProps> = ({
               toolbarContents: () => (
                 <DiffSourceToggleWrapper>
                   <UndoRedo />
+                  <Separator />
                   <BlockTypeSelect />
                   <BoldItalicUnderlineToggles />
+                  <StrikeThroughSupSubToggles options={['Strikethrough']} />
+                  <Separator />
                   <ListsToggle />
                   <CreateLink />
+                  <InsertImage />
                   <InsertTable />
                   <InsertCodeBlock />
                   <InsertThematicBreak />
@@ -127,7 +165,7 @@ export const MDXEditorComponent: React.FC<MDXEditorComponentProps> = ({
         />
       </div>
 
-      {helperText && <p className="text-[11px] text-dark-dim">{helperText}</p>}
+      {helperText && !isDocument && <p className="text-[11px] text-dark-dim">{helperText}</p>}
     </div>
   );
 };

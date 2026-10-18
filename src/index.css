@@ -171,110 +171,574 @@
 }
 
 /* ==========================================================================
+   MDXEditor Radix Theme CSS Variable Overrides for Dark Mode
+   ========================================================================== */
+:root.dark,
+.dark,
+.dark-theme,
+body.dark-theme,
+.mdx-dark-container {
+  --basePageBg: #0B0D14;
+  --baseBase: #121522;
+  --baseBgSubtle: #161928;
+  --baseBg: #1A1D2E;
+  --baseBgHover: #22263C;
+  --baseBgActive: #2B304C;
+  --baseLine: rgba(255, 255, 255, 0.08);
+  --baseBorder: rgba(255, 255, 255, 0.12);
+  --baseBorderHover: rgba(157, 140, 252, 0.35);
+  --baseSolid: #8B5CF6;
+  --baseSolidHover: #7C3AED;
+  --baseText: #CBD5E1;
+  --baseTextContrast: #FFFFFF;
+
+  --accentBase: #161928;
+  --accentBgSubtle: #1E2238;
+  --accentBg: rgba(139, 92, 246, 0.15);
+  --accentBgHover: rgba(139, 92, 246, 0.25);
+  --accentBgActive: rgba(139, 92, 246, 0.35);
+  --accentLine: rgba(139, 92, 246, 0.4);
+  --accentBorder: rgba(139, 92, 246, 0.5);
+  --accentBorderHover: #8B5CF6;
+  --accentSolid: #8B5CF6;
+  --accentSolidHover: #7C3AED;
+  --accentText: #C4B5FD;
+  --accentTextContrast: #FFFFFF;
+}
+
+/* ==========================================================================
    MDXEditor Dark Theme Polish & Typography
    ========================================================================== */
-.mdx-dark-container .mdxeditor {
+.mdx-dark-container .mdxeditor,
+.mdxeditor.dark-theme {
   background-color: transparent !important;
   color: #F1F5F9;
   font-family: inherit;
 }
 
-.mdx-dark-container .mdxeditor [role="toolbar"] {
+.mdx-dark-container .mdxeditor [role="toolbar"],
+.mdxeditor [role="toolbar"] {
   background-color: #131622 !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
   padding: 6px 8px !important;
   gap: 4px;
 }
 
-.mdx-dark-container .mdxeditor button[type="button"] {
-  color: #94A3B8;
-  border-radius: 8px;
-  transition: all 0.15s ease;
+/* Document CMS Editor Root - Full Height & Independent Scrolling Chain */
+.mdx-dark-container .document-editor-root,
+.mdxeditor.document-editor-root {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  flex: 1 1 0% !important;
+  overflow: hidden !important;
 }
 
-.mdx-dark-container .mdxeditor button[type="button"]:hover {
-  background-color: rgba(157, 140, 252, 0.12) !important;
+.document-editor-root [role="toolbar"] {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 30 !important;
+  background-color: rgba(19, 22, 34, 0.96) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding: 8px 24px !important;
+  flex-shrink: 0 !important;
+  overflow-x: auto !important;
+  scrollbar-width: thin !important;
+}
+
+/* 1. Diff source wrapper must fill flex container */
+.document-editor-root .mdxeditor-diff-source-wrapper {
+  flex: 1 1 0% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* 2. Rich text editor must be flex column with height 100% */
+.document-editor-root .mdxeditor-rich-text-editor {
+  flex: 1 1 0% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* 3. The contenteditable root is the primary SCROLL CONTAINER */
+.document-editor-root .mdxeditor-root-contenteditable {
+  flex: 1 1 0% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-behavior: smooth !important;
+  padding: 1.5rem 1rem 6rem 1rem !important;
+}
+
+/* 4. Inside the scroll container, the editable content expands naturally */
+.document-editor-root .mdxeditor-contenteditable-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  min-height: 100% !important;
+  flex-shrink: 0 !important;
+}
+
+.document-editor-root [contenteditable="true"] {
+  width: 100% !important;
+  max-width: 54rem !important;
+  min-height: calc(100vh - 280px) !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  cursor: text !important;
+}
+
+/* Source & diff editors also scroll */
+.document-editor-root .mdxeditor-source-editor,
+.document-editor-root .mdxeditor-diff-editor,
+.document-editor-root .cm-editor {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: auto !important;
+}
+
+.document-editor-root .cm-scroller {
+  overflow: auto !important;
+}
+
+/* Modern sleek scrollbar for editor */
+.document-editor-root .mdxeditor-root-contenteditable::-webkit-scrollbar {
+  width: 8px;
+}
+.document-editor-root .mdxeditor-root-contenteditable::-webkit-scrollbar-track {
+  background: rgba(13, 15, 23, 0.6);
+}
+.document-editor-root .mdxeditor-root-contenteditable::-webkit-scrollbar-thumb {
+  background: rgba(157, 140, 252, 0.25);
+  border-radius: 9999px;
+}
+.document-editor-root .mdxeditor-root-contenteditable::-webkit-scrollbar-thumb:hover {
+  background: rgba(157, 140, 252, 0.45);
+}
+
+/* ==========================================================================
+   TABLE CELL HEIGHT & LAYOUT COMPACT FIX
+   ========================================================================== */
+/* 1. Prevent MDXEditor table from stretching vertically to fill 100% container */
+.mdxeditor table,
+.mdxeditor [class*="_tableEditor"],
+.prose table {
+  height: auto !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  border-collapse: collapse !important;
+  border-spacing: 0 !important;
+  margin: 1.25rem 0 !important;
+  table-layout: auto !important;
+}
+
+/* 2. Table rows auto-fit compact height */
+.mdxeditor table tr,
+.mdxeditor [class*="_tableEditor"] tr,
+.prose table tr {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* 3. Table Headers & Cells - Clean compact padding and line height */
+.mdxeditor table th,
+.mdxeditor [class*="_tableEditor"] th,
+.prose table th {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 8px 12px !important;
+  background-color: #1A1D2E !important;
+  color: #C4B5FD !important;
+  font-weight: 600 !important;
+  font-size: 0.8125rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  text-align: left !important;
+  vertical-align: middle !important;
+  line-height: 1.35 !important;
+}
+
+.mdxeditor table td,
+.mdxeditor [class*="_tableEditor"] td:not([class*="_toolCell"]),
+.prose table td {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 6px 12px !important;
+  background-color: rgba(17, 20, 31, 0.6) !important;
   color: #E2E8F0 !important;
+  font-size: 0.8125rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  vertical-align: middle !important;
+  line-height: 1.4 !important;
+}
+
+/* Alternating table rows for clean readability */
+.mdxeditor table tr:nth-child(even) td,
+.mdxeditor [class*="_tableEditor"] tr:nth-child(even) td,
+.prose table tr:nth-child(even) td {
+  background-color: rgba(23, 27, 43, 0.7) !important;
+}
+
+/* 4. CRITICAL: Remove massive default paragraph margins inside table cells */
+.mdxeditor table th p,
+.mdxeditor table td p,
+.mdxeditor table th div,
+.mdxeditor table td div,
+.mdxeditor [class*="_tableEditor"] th p,
+.mdxeditor [class*="_tableEditor"] td p,
+.mdxeditor [class*="_tableEditor"] th div,
+.mdxeditor [class*="_tableEditor"] td div,
+.prose table th p,
+.prose table td p,
+.prose table th div,
+.prose table td div {
+  margin: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  line-height: 1.4 !important;
+}
+
+/* Active / focused cell outline in MDXEditor */
+.mdxeditor [class*="_tableEditor"] td[data-active='true'],
+.mdxeditor [class*="_tableEditor"] th[data-active='true'],
+.mdxeditor [class*="_tableEditor"] td:focus-within,
+.mdxeditor [class*="_tableEditor"] th:focus-within {
+  outline: 1.5px solid #8B5CF6 !important;
+  outline-offset: -1.5px !important;
+  background-color: rgba(139, 92, 246, 0.12) !important;
+}
+
+/* Tool cells (+ button, column trigger) compact sizing */
+.mdxeditor [class*="_tableEditor"] [class*="_toolCell"],
+.mdxeditor [class*="_tableEditor"] [data-tool-cell='true'] {
+  width: 24px !important;
+  min-width: 24px !important;
+  max-width: 28px !important;
+  height: 24px !important;
+  padding: 2px !important;
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* MDXEditor Table action buttons (+ Column, + Row, Dropdown triggers) in Dark Mode */
+.mdxeditor [class*="_tableEditor"] [class*="_tableColumnEditorTrigger"],
+.mdxeditor [class*="_tableEditor"] [class*="_tableRowEditorTrigger"],
+.mdxeditor [class*="_tableEditor"] [class*="_addRowButton"],
+.mdxeditor [class*="_tableEditor"] [class*="_addColumnButton"] {
+  background-color: #1A1D2E !important;
+  color: #A5B4FC !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 4px !important;
+  opacity: 0.75 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.mdxeditor [class*="_tableEditor"] [class*="_tableColumnEditorTrigger"]:hover,
+.mdxeditor [class*="_tableEditor"] [class*="_tableRowEditorTrigger"]:hover,
+.mdxeditor [class*="_tableEditor"] [class*="_addRowButton"]:hover,
+.mdxeditor [class*="_tableEditor"] [class*="_addColumnButton"]:hover {
+  background-color: #7C3AED !important;
+  color: #FFFFFF !important;
+  border-color: #8B5CF6 !important;
+  opacity: 1 !important;
+}
+
+/* ==========================================================================
+   Radix & Lexical Floating Dialogs, Popovers, & Portals (Dark Mode)
+   ========================================================================== */
+/* Target all floating overlays, popovers, and portal dialogs */
+[data-radix-popper-content-wrapper],
+[data-radix-popper-content-wrapper] [role="dialog"],
+[data-radix-select-viewport],
+[data-radix-select-content],
+[role="listbox"],
+[role="menu"],
+[role="dialog"],
+[class*="_popoverContent"],
+[class*="_dialogContent"],
+[class*="_largeDialogContent"],
+[class*="_linkDialogPopoverContent"],
+[class*="_tableColumnEditorPopoverContent"] {
+  z-index: 9999 !important;
+  background-color: #161928 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #F1F5F9 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 16px 40px -6px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Floating dialog arrows */
+[class*="_popoverArrow"] {
+  fill: #161928 !important;
+}
+
+/* Dialog headings and labels */
+[class*="_dialogTitle"],
+[role="dialog"] h2,
+[role="dialog"] h3 {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+}
+
+/* Dialog inputs */
+[class*="_dialogInput"],
+[class*="_linkDialogInput"],
+[role="dialog"] input[type="text"],
+[role="dialog"] input[type="url"],
+[role="dialog"] textarea {
+  background-color: #0D101C !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #FFFFFF !important;
+  border-radius: 8px !important;
+  padding: 6px 10px !important;
+  font-size: 0.8125rem !important;
+  outline: none !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+[class*="_dialogInput"]:focus,
+[class*="_linkDialogInput"]:focus,
+[role="dialog"] input:focus,
+[role="dialog"] textarea:focus {
+  border-color: #8B5CF6 !important;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25) !important;
+}
+
+/* Dialog submit and action buttons */
+[role="dialog"] button[type="submit"],
+[role="dialog"] button[class*="_primaryButton"] {
+  background-color: #7C3AED !important;
+  color: #FFFFFF !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  padding: 6px 14px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: background-color 0.15s ease !important;
+}
+
+[role="dialog"] button[type="submit"]:hover,
+[role="dialog"] button[class*="_primaryButton"]:hover {
+  background-color: #6D28D9 !important;
+}
+
+[role="dialog"] button[type="reset"],
+[class*="_dialogCloseButton"] {
+  color: #94A3B8 !important;
+  cursor: pointer !important;
+}
+[class*="_dialogCloseButton"]:hover {
+  color: #FFFFFF !important;
+}
+
+/* Select options inside floating menus */
+[role="option"],
+[role="menuitem"],
+[class*="_selectItem"],
+[class*="_toolbarNodeKindSelectItem"] {
+  color: #CBD5E1 !important;
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  font-size: 0.8125rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+[role="option"]:hover,
+[role="option"][data-highlighted],
+[role="menuitem"]:hover,
+[role="menuitem"][data-highlighted],
+[class*="_selectItem"]:hover,
+[class*="_selectItem"][data-highlighted],
+[class*="_toolbarNodeKindSelectItem"]:hover,
+[class*="_toolbarNodeKindSelectItem"][data-highlighted] {
+  background-color: rgba(139, 92, 246, 0.22) !important;
+  color: #FFFFFF !important;
+  outline: none !important;
+}
+
+[role="option"][aria-selected="true"],
+[class*="_selectItem"][data-state="checked"] {
+  color: #C4B5FD !important;
+  font-weight: 600 !important;
+  background-color: rgba(139, 92, 246, 0.15) !important;
+}
+
+/* Toolbar Buttons & Triggers in Dark Mode */
+.mdx-dark-container .mdxeditor button[type="button"],
+.mdxeditor button[type="button"] {
+  color: #94A3B8 !important;
+  border-radius: 6px !important;
+  transition: all 0.15s ease !important;
+}
+
+.mdx-dark-container .mdxeditor button[type="button"]:hover,
+.mdxeditor button[type="button"]:hover {
+  background-color: rgba(157, 140, 252, 0.15) !important;
+  color: #FFFFFF !important;
 }
 
 .mdx-dark-container .mdxeditor button[data-state="on"],
 .mdx-dark-container .mdxeditor button[aria-pressed="true"],
-.mdx-dark-container .mdxeditor button[data-active="true"] {
-  background-color: rgba(157, 140, 252, 0.25) !important;
+.mdx-dark-container .mdxeditor button[data-active="true"],
+.mdxeditor button[data-state="on"],
+.mdxeditor button[aria-pressed="true"],
+.mdxeditor button[data-active="true"] {
+  background-color: rgba(139, 92, 246, 0.28) !important;
   color: #C4B5FD !important;
 }
 
+/* Toolbar Node Kind (Paragraph, H1, etc.) & Code Language Select Dropdown Triggers */
 .mdx-dark-container .mdxeditor select,
-.mdx-dark-container .mdxeditor [role="combobox"] {
+.mdx-dark-container .mdxeditor [role="combobox"],
+.mdxeditor [class*="_selectTrigger"],
+.mdxeditor [class*="_toolbarNodeKindSelectTrigger"],
+.mdxeditor [class*="_toolbarCodeBlockLanguageSelectTrigger"] {
   background-color: #1A1D2D !important;
   color: #E2E8F0 !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 6px !important;
+  padding: 4px 8px !important;
+  font-size: 0.8125rem !important;
 }
 
-.mdx-dark-container .mdxeditor .prose {
+.mdxeditor [class*="_selectTrigger"]:hover,
+.mdxeditor [class*="_toolbarNodeKindSelectTrigger"]:hover {
+  border-color: rgba(157, 140, 252, 0.4) !important;
+  color: #FFFFFF !important;
+}
+
+/* Toolbar Separator */
+.mdxeditor [role="separator"] {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  width: 1px !important;
+  margin: 0 4px !important;
+}
+
+/* CodeMirror in Dark Theme */
+.mdxeditor .cm-editor {
+  background-color: #0D101B !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+}
+.mdxeditor .cm-gutters {
+  background-color: #111422 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #64748B !important;
+}
+.mdxeditor .cm-activeLine {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+.mdxeditor .cm-cursor {
+  border-left: 2px solid #A78BFA !important;
+}
+
+/* Link Preview Card inside Editor */
+.mdxeditor [class*="_linkDialogAnchor"],
+.mdxeditor [class*="_linkDialogPreviewAnchor"] {
+  color: #A78BFA !important;
+  text-decoration: underline !important;
+}
+
+/* Prose Typography Colors in Dark Mode */
+.mdx-dark-container .mdxeditor .prose,
+.document-editor-root .prose {
   color: #E2E8F0;
 }
 
-.mdx-dark-container .mdxeditor .prose h1 {
-  color: #FFFFFF;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
+.mdx-dark-container .mdxeditor .prose h1,
+.document-editor-root .prose h1 {
+  color: #FFFFFF !important;
+  font-size: 1.625rem !important;
+  font-weight: 800 !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 0.75rem !important;
+  letter-spacing: -0.02em !important;
 }
 
-.mdx-dark-container .mdxeditor .prose h2 {
-  color: #F8FAFC;
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
+.mdx-dark-container .mdxeditor .prose h2,
+.document-editor-root .prose h2 {
+  color: #F8FAFC !important;
+  font-size: 1.35rem !important;
+  font-weight: 700 !important;
+  margin-top: 1.25rem !important;
+  margin-bottom: 0.5rem !important;
 }
 
-.mdx-dark-container .mdxeditor .prose h3 {
-  color: #E2E8F0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-top: 0.75rem;
-  margin-bottom: 0.25rem;
+.mdx-dark-container .mdxeditor .prose h3,
+.document-editor-root .prose h3 {
+  color: #E2E8F0 !important;
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  margin-top: 1rem !important;
+  margin-bottom: 0.35rem !important;
 }
 
-.mdx-dark-container .mdxeditor .prose p {
+.mdx-dark-container .mdxeditor .prose p,
+.document-editor-root .prose p {
   color: #CBD5E1;
-  line-height: 1.6;
-  margin-bottom: 0.75rem;
+  line-height: 1.65;
+  margin-bottom: 0.85rem;
 }
 
-.mdx-dark-container .mdxeditor .prose table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1rem 0;
+.mdx-dark-container .mdxeditor .prose a,
+.document-editor-root .prose a {
+  color: #A78BFA !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+}
+.mdx-dark-container .mdxeditor .prose a:hover,
+.document-editor-root .prose a:hover {
+  color: #C4B5FD !important;
 }
 
-.mdx-dark-container .mdxeditor .prose th {
-  background-color: #1E2235;
-  color: #A5B4FC;
-  font-weight: 600;
-  padding: 8px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: left;
+.mdx-dark-container .mdxeditor .prose blockquote,
+.document-editor-root .prose blockquote {
+  border-left: 3px solid #8B5CF6 !important;
+  padding-left: 1rem !important;
+  margin: 1.25rem 0 !important;
+  color: #CBD5E1 !important;
+  background-color: rgba(139, 92, 246, 0.06) !important;
+  border-radius: 0 8px 8px 0 !important;
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
 }
 
-.mdx-dark-container .mdxeditor .prose td {
-  padding: 8px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #CBD5E1;
+.mdx-dark-container .mdxeditor .prose code:not(pre code),
+.document-editor-root .prose code:not(pre code) {
+  background-color: rgba(139, 92, 246, 0.12) !important;
+  color: #DDD6FE !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-size: 0.85em !important;
 }
 
-.mdx-dark-container .mdxeditor .prose blockquote {
-  border-left: 3px solid #9D8CFC;
-  padding-left: 1rem;
-  margin: 1rem 0;
-  color: #CBD5E1;
-  background-color: rgba(157, 140, 252, 0.05);
-  border-radius: 0 8px 8px 0;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+.mdx-dark-container .mdxeditor .prose hr,
+.document-editor-root .prose hr {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  margin: 2rem 0 !important;
 }
 

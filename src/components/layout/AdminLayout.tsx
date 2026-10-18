@@ -97,7 +97,17 @@ export const AdminLayout: React.FC = () => {
     }
   };
 
-  const pageInfo = getPageInfo();
+  const isEditorRoute =
+    location.pathname === ROUTES.BLOG_CREATE ||
+    location.pathname.startsWith('/blogs/create') ||
+    location.pathname.startsWith('/blogs/edit');
+
+  const pageInfo = isEditorRoute
+    ? {
+        title: "Article Studio",
+        subtitle: "Multilingual CMS Editor • Hygraph GraphQL",
+      }
+    : getPageInfo();
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-gray-50 dark:bg-background">
@@ -120,7 +130,13 @@ export const AdminLayout: React.FC = () => {
           subtitle={pageInfo.subtitle}
         />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+        <main
+          className={
+            isEditorRoute
+              ? "flex-1 overflow-hidden p-0 m-0 min-h-0 flex flex-col"
+              : "flex-1 overflow-y-auto p-4 md:p-8 space-y-6"
+          }
+        >
           <Outlet />
         </main>
       </div>

@@ -147,10 +147,41 @@ export interface Note {
   category?: NoteCategory;
 }
 
+export type ArticleLanguage = 'EN' | 'HI';
+
+export interface HygraphAuthor {
+  id: string;
+  name: string;
+  email?: string;
+  bio?: string;
+  bioHi?: string;
+  avatarUrl?: string;
+  role?: string;
+}
+
+export interface HygraphCategory {
+  id: string;
+  name: string;
+  nameHi?: string;
+  slug: string;
+  sortOrder?: number;
+  isActive?: boolean;
+}
+
+export interface LinkedTranslation {
+  id: string;
+  title: string;
+  slug: string;
+  language: ArticleLanguage;
+  is_published: boolean;
+  stage?: string;
+}
+
 export interface BlogCategory {
   id: string;
   title: string;
   hindi_title: string;
+  slug?: string;
   is_active: boolean;
   sort_order: number;
   created_at: string;
@@ -159,21 +190,53 @@ export interface BlogCategory {
 export interface Blog {
   id: string;
   category_id: string;
-  title_en: string;
-  title_hi: string;
+  // Multilingual single-language primary fields
+  title: string;
   slug: string;
-  summary_en: string;
-  summary_hi: string;
-  content_en: string;
-  content_hi: string;
+  language: ArticleLanguage;
+  translation_group_id: string;
+  content: string;
+  excerpt?: string;
+  meta_title?: string;
+  meta_description?: string;
   featured_image?: string;
+  featured_image_alt?: string;
   author: string;
+  author_id?: string;
   is_featured: boolean;
   is_published: boolean;
   published_at?: string;
   created_at: string;
+  updated_at?: string;
+  legacy_id?: string;
+
+  // Translation linking info
+  linked_translation?: LinkedTranslation | null;
+
+  // Backward-compatibility aliases for legacy components
+  title_en?: string;
+  title_hi?: string;
+  summary_en?: string;
+  summary_hi?: string;
+  content_en?: string;
+  content_hi?: string;
+
   // Joins
   category?: BlogCategory;
+}
+
+export interface CMSPage {
+  id: string;
+  title: string;
+  slug: string;
+  language: ArticleLanguage;
+  translation_group_id?: string;
+  content: string;
+  meta_title?: string;
+  meta_description?: string;
+  is_published: boolean;
+  created_at: string;
+  updated_at?: string;
 }
 
 export interface BookCategory {

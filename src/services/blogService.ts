@@ -1,83 +1,71 @@
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { hygraphBlogService } from './hygraphBlogService';
 import { BlogCategory, Blog } from '../types/database';
 
 export const blogService = {
   // Categories
-  async getCategories(): Promise<BlogCategory[]> {
-    if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('blog_categories').select('*').order('sort_order', { ascending: true });
-      if (error) throw error;
-      return data || [];
-    }
-    return [];
+  getCategories(): Promise<BlogCategory[]> {
+    return hygraphBlogService.getCategories();
   },
 
-  async createCategory(payload: Omit<BlogCategory, 'id' | 'created_at'>): Promise<BlogCategory> {
-    if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('blog_categories').insert(payload).select().single();
-      if (error) throw error;
-      return data;
-    }
-    return { ...payload, id: `bcat-${Date.now()}`, created_at: new Date().toISOString() };
+  createCategory(payload: {
+    title: string;
+    hindi_title?: string;
+    slug?: string;
+    sort_order?: number;
+    is_active?: boolean;
+  }): Promise<BlogCategory> {
+    return hygraphBlogService.createCategory(payload);
   },
 
-  async updateCategory(id: string, updates: Partial<BlogCategory>): Promise<BlogCategory> {
-    if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('blog_categories').update(updates).eq('id', id).select().single();
-      if (error) throw error;
-      return data;
-    }
-    return { id, ...updates } as BlogCategory;
+  updateCategory(id: string, updates: Partial<BlogCategory>): Promise<BlogCategory> {
+    return hygraphBlogService.updateCategory(id, updates);
   },
 
-  async deleteCategory(id: string): Promise<void> {
-    if (isSupabaseConfigured && supabase) {
-      const { error } = await supabase.from('blog_categories').delete().eq('id', id);
-      if (error) throw error;
-    }
+  deleteCategory(id: string): Promise<void> {
+    return hygraphBlogService.deleteCategory(id);
   },
 
-  // Blogs
-  async getBlogs(): Promise<Blog[]> {
-    if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('blogs').select('*, category:blog_categories(*)').order('created_at', { ascending: false });
-      if (error) throw error;
-      return data || [];
-    }
-    return [];
+  // Blogs / Posts
+  getBlogs(): Promise<Blog[]> {
+    return hygraphBlogService.getBlogs();
   },
 
-  async getBlogById(id: string): Promise<Blog | null> {
-    if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('blogs').select('*, category:blog_categories(*)').eq('id', id).maybeSingle();
-      if (error) throw error;
-      return data;
-    }
-    return null;
+  getBlogById(id: string): Promise<Blog | null> {
+    return hygraphBlogService.getBlogById(id);
   },
 
-  async createBlog(payload: Omit<Blog, 'id' | 'created_at' | 'category'>): Promise<Blog> {
-    if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('blogs').insert(payload).select('*, category:blog_categories(*)').single();
-      if (error) throw error;
-      return data;
-    }
-    return { ...payload, id: `blog-${Date.now()}`, created_at: new Date().toISOString() };
+  createBlog(payload: any): Promise<Blog> {
+    return hygraphBlogService.createBlog(payload);
   },
 
-  async updateBlog(id: string, updates: Partial<Blog>): Promise<Blog> {
-    if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('blogs').update(updates).eq('id', id).select('*, category:blog_categories(*)').single();
-      if (error) throw error;
-      return data;
-    }
-    return { id, ...updates } as Blog;
+  updateBlog(id: string, updates: Partial<Blog>): Promise<Blog> {
+    return hygraphBlogService.updateBlog(id, updates);
   },
 
-  async deleteBlog(id: string): Promise<void> {
-    if (isSupabaseConfigured && supabase) {
-      const { error } = await supabase.from('blogs').delete().eq('id', id);
-      if (error) throw error;
-    }
+  deleteBlog(id: string): Promise<void> {
+    return hygraphBlogService.deleteBlog(id);
+  },
+
+  // Multilingual & Translation Operations
+  linkTranslations(postAId: string, postBId: string): Promise<void> {
+    return hygraphBlogService.linkTranslations(postAId, postBId);
+  },
+
+  unlinkTranslation(postId: string): Promise<void> {
+    return hygraphBlogService.unlinkTranslation(postId);
+  },
+
+  createTranslationDraft(sourcePostId: string): Promise<Blog> {
+    return hygraphBlogService.createTranslationDraft(sourcePostId);
+  },
+
+  getEligibleTranslations(targetLanguage: 'EN' | 'HI', excludeId?: string): Promise<Blog[]> {
+    return hygraphBlogService.getEligibleTranslations(targetLanguage, excludeId);
+  },
+
+  getAuthors() {
+    return hygraphBlogService.getAuthors();
   },
 };
+
+export { hygraphBlogService };

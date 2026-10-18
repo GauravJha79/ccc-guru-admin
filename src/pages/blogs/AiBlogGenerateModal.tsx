@@ -255,30 +255,49 @@ export const AiBlogGenerateModal: React.FC<AiBlogGenerateModalProps> = ({
 
     setIsSaving(true);
     try {
-      const payload = {
-        category_id: categoryId,
-        title_en: generatedBlog.title_en,
-        title_hi: generatedBlog.title_hi,
+      const translationGroupId = `tg_ai_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+      // Create English article
+      const enPost = await blogService.createBlog({
+        title: generatedBlog.title_en,
         slug: generatedBlog.slug,
-        summary_en: generatedBlog.summary_en,
-        summary_hi: generatedBlog.summary_hi,
-        content_en: generatedBlog.content_en,
-        content_hi: generatedBlog.content_hi,
+        language: 'EN',
+        translation_group_id: translationGroupId,
+        content: generatedBlog.content_en,
+        excerpt: generatedBlog.summary_en,
+        meta_title: generatedBlog.title_en,
+        meta_description: generatedBlog.summary_en,
         featured_image: thumbnailPreviewUrl || undefined,
-        author: author.trim() || authorName,
+        featured_image_alt: generatedBlog.title_en,
+        category_id: categoryId,
         is_featured: isFeatured,
         is_published: isPublished,
-        published_at: isPublished ? new Date().toISOString() : undefined,
-      };
+      });
 
-      const created = await blogService.createBlog(payload);
-      success('Article Created', `Published "${created.title_en}"`);
+      // Create Hindi article and link in the same group
+      await blogService.createBlog({
+        title: generatedBlog.title_hi,
+        slug: `${generatedBlog.slug}-hi`,
+        language: 'HI',
+        translation_group_id: translationGroupId,
+        content: generatedBlog.content_hi,
+        excerpt: generatedBlog.summary_hi,
+        meta_title: generatedBlog.title_hi,
+        meta_description: generatedBlog.summary_hi,
+        featured_image: thumbnailPreviewUrl || undefined,
+        featured_image_alt: generatedBlog.title_hi,
+        category_id: categoryId,
+        is_featured: isFeatured,
+        is_published: isPublished,
+      });
+
+      success('Bilingual Articles Created', `Created linked English & Hindi articles in Hygraph: "${enPost.title}"`);
       if (onSuccess) {
-        onSuccess(created);
+        onSuccess(enPost);
       }
       handleResetAndClose();
     } catch (err: any) {
-      toastError('Save Failed', err.message || 'Could not save article to database.');
+      toastError('Save Failed', err.message || 'Could not save articles to Hygraph.');
     } finally {
       setIsSaving(false);
     }
