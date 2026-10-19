@@ -50,13 +50,21 @@ interface PublishAssetResponse {
 /**
  * Sanitizes a filename to prevent S3 key encoding or special character issues.
  */
-function sanitizeFileName(fileName: string): string {
+function sanitizeFileName(fileName: string, mimeType?: string): string {
   const parts = fileName.split('.');
   const ext = parts.length > 1 ? parts.pop() : '';
   const base = parts.join('.');
   const safeBase = base.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 50);
-  const safeExt = (ext || 'png').toLowerCase().replace(/[^a-z0-9]/g, '');
-  return `${Date.now()}-${safeBase || 'image'}.${safeExt}`;
+  let safeExt = (ext || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (!safeExt) {
+    if (mimeType === 'application/pdf') safeExt = 'pdf';
+    else if (mimeType?.includes('png')) safeExt = 'png';
+    else if (mimeType?.includes('jpeg') || mimeType?.includes('jpg')) safeExt = 'jpg';
+    else if (mimeType?.includes('webp')) safeExt = 'webp';
+    else safeExt = 'bin';
+  }
+  const defaultBase = safeExt === 'pdf' ? 'document' : 'asset';
+  return `${Date.now()}-${safeBase || defaultBase}.${safeExt}`;
 }
 
 /**
@@ -71,8 +79,14 @@ export async function uploadAssetToHygraph(
   file: File | Blob,
   customFileName?: string
 ): Promise<HygraphAssetUploadResult> {
-  const originalName = customFileName || (file instanceof File ? file.name : 'asset.png');
-  const safeFileName = sanitizeFileName(originalName);
+  const originalName =
+    customFileName ||
+    (file instanceof File
+      ? file.name
+      : file.type === 'application/pdf'
+      ? 'document.pdf'
+      : 'asset.png');
+  const safeFileName = sanitizeFileName(originalName, file.type);
 
   // Step 1: Request S3 upload signature from Hygraph Content API
   const createAssetMutation = `
@@ -147,35 +161,45 @@ export async function uploadAssetToHygraph(
   }
 
   // Step 3: Publish asset so it is immediately accessible on the global graphassets CDN
-  try {
-    // Short grace delay to allow Hygraph S3 ingestion worker to register file headers
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    const publishMutation = `
-      mutation PublishAssetEntry($id: ID!) {
-        publishAsset(where: { id: $id }, to: [PUBLISHED]) {
-          id
-          url
-          fileName
-          mimeType
-          size
-          stage
-        }
+  let publishedUrl = asset.url;
+  const publishMutation = `
+    mutation PublishAssetEntry($id: ID!) {
+      publishAsset(where: { id: $id }, to: [PUBLISHED]) {
+        id
+        url
+        fileName
+        mimeType
+        size
+        stage
       }
-    `;
+    }
+  `;
 
-    await hygraphRequest<PublishAssetResponse>(publishMutation, { id: asset.id });
-  } catch (pubErr) {
-    // Non-fatal: Asset is uploaded, even if publish stage takes an extra second
-    console.warn('Hygraph asset auto-publish notice (draft URL active):', pubErr);
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      // Grace delay to allow Hygraph S3 ingestion worker to register file headers
+      await new Promise((resolve) => setTimeout(resolve, attempt === 1 ? 800 : 1200));
+      const pubRes = await hygraphRequest<PublishAssetResponse>(publishMutation, { id: asset.id });
+      if (pubRes?.publishAsset?.url) {
+        publishedUrl = pubRes.publishAsset.url;
+      }
+      break;
+    } catch (pubErr) {
+      if (attempt === 3) {
+        // Non-fatal: Asset is uploaded, even if publish stage takes an extra second
+        console.warn('Hygraph asset auto-publish notice (draft URL active):', pubErr);
+      }
+    }
   }
 
   return {
     id: asset.id,
-    url: asset.url,
+    url: publishedUrl || asset.url,
     fileName: safeFileName,
     size: file.size,
-    mimeType: file.type || 'image/png',
+    mimeType:
+      file.type ||
+      (safeFileName.endsWith('.pdf') ? 'application/pdf' : 'image/png'),
   };
 }
 

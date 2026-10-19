@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
   FileQuestion,
   Layers,
@@ -11,14 +11,14 @@ import {
   FolderTree,
   PlusCircle,
   ArrowRight,
-} from 'lucide-react';
-import { testService } from '../../services/testService';
-import { questionService } from '../../services/questionService';
-import { chapterService } from '../../services/chapterService';
-import { noteService } from '../../services/noteService';
-import { blogService } from '../../services/blogService';
-import { bookService } from '../../services/bookService';
-import { enrollmentService } from '../../services/enrollmentService';
+} from "lucide-react";
+import { testService } from "../../services/testService";
+import { questionService } from "../../services/questionService";
+import { chapterService } from "../../services/chapterService";
+import { noteService } from "../../services/noteService";
+import { blogService } from "../../services/blogService";
+import { bookService } from "../../services/bookService";
+import { enrollmentService } from "../../services/enrollmentService";
 import {
   Question,
   TestCategory,
@@ -29,12 +29,15 @@ import {
   Blog,
   Book,
   SeriesEnrollment,
-} from '../../types/database';
-import { StatCard } from '../../components/common/StatCard';
-import { Badge } from '../../components/common/Badge';
-import { Button } from '../../components/common/Button';
-import { LoadingSkeleton, CardSkeleton } from '../../components/common/LoadingSkeleton';
-import { ROUTES } from '../../constants/routes';
+} from "../../types/database";
+import { StatCard } from "../../components/common/StatCard";
+import { Badge } from "../../components/common/Badge";
+import { Button } from "../../components/common/Button";
+import {
+  LoadingSkeleton,
+  CardSkeleton,
+} from "../../components/common/LoadingSkeleton";
+import { ROUTES } from "../../constants/routes";
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -76,17 +79,22 @@ export const DashboardPage: React.FC = () => {
           enrollmentService.getEnrollments(),
         ]);
 
-        if (questionsData.status === 'fulfilled') setQuestions(questionsData.value);
-        if (categoriesData.status === 'fulfilled') setTestCategories(categoriesData.value);
-        if (seriesData.status === 'fulfilled') setTestSeries(seriesData.value);
-        if (itemsData.status === 'fulfilled') setTestSeriesItems(itemsData.value);
-        if (chaptersData.status === 'fulfilled') setChapters(chaptersData.value);
-        if (notesData.status === 'fulfilled') setNotes(notesData.value);
-        if (blogsData.status === 'fulfilled') setBlogs(blogsData.value);
-        if (booksData.status === 'fulfilled') setBooks(booksData.value);
-        if (enrollmentsData.status === 'fulfilled') setEnrollments(enrollmentsData.value);
+        if (questionsData.status === "fulfilled")
+          setQuestions(questionsData.value);
+        if (categoriesData.status === "fulfilled")
+          setTestCategories(categoriesData.value);
+        if (seriesData.status === "fulfilled") setTestSeries(seriesData.value);
+        if (itemsData.status === "fulfilled")
+          setTestSeriesItems(itemsData.value);
+        if (chaptersData.status === "fulfilled")
+          setChapters(chaptersData.value);
+        if (notesData.status === "fulfilled") setNotes(notesData.value);
+        if (blogsData.status === "fulfilled") setBlogs(blogsData.value);
+        if (booksData.status === "fulfilled") setBooks(booksData.value);
+        if (enrollmentsData.status === "fulfilled")
+          setEnrollments(enrollmentsData.value);
       } catch (err) {
-        console.error('Failed to load dashboard data:', err);
+        console.error("Failed to load dashboard data:", err);
       } finally {
         setLoading(false);
       }
@@ -107,9 +115,11 @@ export const DashboardPage: React.FC = () => {
   const publishedBlogs = blogs.filter((b) => b.is_published).length;
   const featuredSeries = testSeries.filter((s) => s.is_featured);
 
-  const easyQuestions = questions.filter((q) => q.difficulty === 'Easy').length;
-  const mediumQuestions = questions.filter((q) => q.difficulty === 'Medium').length;
-  const hardQuestions = questions.filter((q) => q.difficulty === 'Hard').length;
+  const easyQuestions = questions.filter((q) => q.difficulty === "Easy").length;
+  const mediumQuestions = questions.filter(
+    (q) => q.difficulty === "Medium",
+  ).length;
+  const hardQuestions = questions.filter((q) => q.difficulty === "Hard").length;
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -122,13 +132,16 @@ export const DashboardPage: React.FC = () => {
               <Badge variant="primary" size="sm">
                 Supabase Live Database
               </Badge>
-              <span className="text-xs text-dark-muted">• Real-Time Backend</span>
+              <span className="text-xs text-dark-muted">
+                • Real-Time Backend
+              </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-              CCC Prep Admin Console
+              CCCGuru Admin
             </h1>
             <p className="text-sm text-dark-muted leading-relaxed">
-              Manage bilingual question banks, practice test sets, chapter notes, affiliate books, and student enrollments.
+              Manage bilingual question banks, practice test sets, chapter
+              notes, affiliate books, and student enrollments.
             </p>
           </div>
 
@@ -185,29 +198,43 @@ export const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="p-4 rounded-2xl bg-background-card border border-dark-border flex items-center justify-between">
           <div>
-            <p className="text-xs text-dark-muted font-medium">Test Categories</p>
-            <p className="text-xl font-bold text-white mt-0.5">{totalCategories}</p>
+            <p className="text-xs text-dark-muted font-medium">
+              Test Categories
+            </p>
+            <p className="text-xl font-bold text-white mt-0.5">
+              {totalCategories}
+            </p>
           </div>
           <FolderTree className="w-5 h-5 text-lavender-400" />
         </div>
         <div className="p-4 rounded-2xl bg-background-card border border-dark-border flex items-center justify-between">
           <div>
-            <p className="text-xs text-dark-muted font-medium">Published Blogs</p>
-            <p className="text-xl font-bold text-white mt-0.5">{publishedBlogs} / {totalBlogs}</p>
+            <p className="text-xs text-dark-muted font-medium">
+              Published Blogs
+            </p>
+            <p className="text-xl font-bold text-white mt-0.5">
+              {publishedBlogs} / {totalBlogs}
+            </p>
           </div>
           <Newspaper className="w-5 h-5 text-emerald-400" />
         </div>
         <div className="p-4 rounded-2xl bg-background-card border border-dark-border flex items-center justify-between">
           <div>
-            <p className="text-xs text-dark-muted font-medium">Recommended Books</p>
+            <p className="text-xs text-dark-muted font-medium">
+              Recommended Books
+            </p>
             <p className="text-xl font-bold text-white mt-0.5">{totalBooks}</p>
           </div>
           <BookMarked className="w-5 h-5 text-amber-400" />
         </div>
         <div className="p-4 rounded-2xl bg-background-card border border-dark-border flex items-center justify-between">
           <div>
-            <p className="text-xs text-dark-muted font-medium">Syllabus Chapters</p>
-            <p className="text-xl font-bold text-white mt-0.5">{chapters.length}</p>
+            <p className="text-xs text-dark-muted font-medium">
+              Syllabus Chapters
+            </p>
+            <p className="text-xl font-bold text-white mt-0.5">
+              {chapters.length}
+            </p>
           </div>
           <BookOpen className="w-5 h-5 text-sky-400" />
         </div>
@@ -219,10 +246,16 @@ export const DashboardPage: React.FC = () => {
         <div className="p-6 rounded-3xl bg-background-card border border-dark-border space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-white">Question Difficulty</h3>
-              <p className="text-xs text-dark-muted">Bank distribution by difficulty</p>
+              <h3 className="text-base font-bold text-white">
+                Question Difficulty
+              </h3>
+              <p className="text-xs text-dark-muted">
+                Bank distribution by difficulty
+              </p>
             </div>
-            <Badge variant="neutral" size="sm">{totalQuestions} Total</Badge>
+            <Badge variant="neutral" size="sm">
+              {totalQuestions} Total
+            </Badge>
           </div>
 
           <div className="space-y-3.5">
@@ -234,7 +267,9 @@ export const DashboardPage: React.FC = () => {
               <div className="h-2 w-full bg-background-elevated rounded-full overflow-hidden">
                 <div
                   className="h-full bg-emerald-500 rounded-full transition-all"
-                  style={{ width: `${(easyQuestions / (totalQuestions || 1)) * 100}%` }}
+                  style={{
+                    width: `${(easyQuestions / (totalQuestions || 1)) * 100}%`,
+                  }}
                 />
               </div>
             </div>
@@ -247,7 +282,9 @@ export const DashboardPage: React.FC = () => {
               <div className="h-2 w-full bg-background-elevated rounded-full overflow-hidden">
                 <div
                   className="h-full bg-amber-500 rounded-full transition-all"
-                  style={{ width: `${(mediumQuestions / (totalQuestions || 1)) * 100}%` }}
+                  style={{
+                    width: `${(mediumQuestions / (totalQuestions || 1)) * 100}%`,
+                  }}
                 />
               </div>
             </div>
@@ -260,7 +297,9 @@ export const DashboardPage: React.FC = () => {
               <div className="h-2 w-full bg-background-elevated rounded-full overflow-hidden">
                 <div
                   className="h-full bg-rose-500 rounded-full transition-all"
-                  style={{ width: `${(hardQuestions / (totalQuestions || 1)) * 100}%` }}
+                  style={{
+                    width: `${(hardQuestions / (totalQuestions || 1)) * 100}%`,
+                  }}
                 />
               </div>
             </div>
@@ -272,16 +311,25 @@ export const DashboardPage: React.FC = () => {
             </h4>
             <div className="space-y-2 max-h-44 overflow-y-auto pr-1">
               {chapters.length === 0 ? (
-                <p className="text-xs text-dark-dim italic">No chapters created yet</p>
+                <p className="text-xs text-dark-dim italic">
+                  No chapters created yet
+                </p>
               ) : (
                 chapters.slice(0, 6).map((ch, idx) => {
-                  const count = questions.filter((q) => q.chapter_id === ch.id).length;
+                  const count = questions.filter(
+                    (q) => q.chapter_id === ch.id,
+                  ).length;
                   return (
-                    <div key={ch.id} className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded-lg bg-background-elevated/40">
+                    <div
+                      key={ch.id}
+                      className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded-lg bg-background-elevated/40"
+                    >
                       <span className="text-dark-muted truncate max-w-[200px]">
                         {idx + 1}. {ch.title}
                       </span>
-                      <span className="font-semibold text-lavender-300">{count} Qs</span>
+                      <span className="font-semibold text-lavender-300">
+                        {count} Qs
+                      </span>
                     </div>
                   );
                 })
@@ -294,8 +342,12 @@ export const DashboardPage: React.FC = () => {
         <div className="lg:col-span-2 p-6 rounded-3xl bg-background-card border border-dark-border space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-white">Featured Test Series</h3>
-              <p className="text-xs text-dark-muted">Promoted on mobile app home screen</p>
+              <h3 className="text-base font-bold text-white">
+                Featured Test Series
+              </h3>
+              <p className="text-xs text-dark-muted">
+                Promoted on mobile app home screen
+              </p>
             </div>
             <Link
               to={ROUTES.TEST_SERIES}
@@ -308,7 +360,8 @@ export const DashboardPage: React.FC = () => {
 
           {featuredSeries.length === 0 ? (
             <div className="p-8 text-center rounded-2xl bg-background-elevated/30 border border-dark-border text-xs text-dark-muted">
-              No featured test series currently marked. Create or edit a series to feature it.
+              No featured test series currently marked. Create or edit a series
+              to feature it.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -320,10 +373,10 @@ export const DashboardPage: React.FC = () => {
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <Badge variant="primary" size="sm">
-                      {series.featured_tag || 'FEATURED'}
+                      {series.featured_tag || "FEATURED"}
                     </Badge>
                     <span className="text-xs text-emerald-400 font-bold">
-                      {series.is_paid ? `₹${series.price}` : 'FREE'}
+                      {series.is_paid ? `₹${series.price}` : "FREE"}
                     </span>
                   </div>
 
@@ -331,11 +384,16 @@ export const DashboardPage: React.FC = () => {
                     {series.title}
                   </h4>
                   <p className="text-xs text-dark-muted mt-1 line-clamp-2 leading-relaxed">
-                    {series.featured_short_desc || series.description || 'No description provided'}
+                    {series.featured_short_desc ||
+                      series.description ||
+                      "No description provided"}
                   </p>
 
                   <div className="mt-4 pt-3 border-t border-dark-border/60 flex items-center justify-between text-xs text-dark-dim">
-                    <span>{series.total_sets_available ?? series.total_sets ?? 0} Test Sets</span>
+                    <span>
+                      {series.total_sets_available ?? series.total_sets ?? 0}{" "}
+                      Test Sets
+                    </span>
                     <span className="flex items-center gap-1 text-lavender-400">
                       <Users className="w-3.5 h-3.5" />
                       {series.total_enrolled} Enrolled
@@ -348,7 +406,9 @@ export const DashboardPage: React.FC = () => {
 
           {/* Quick Shortcuts Bar */}
           <div className="p-4 rounded-2xl bg-background-subtle/70 border border-dark-border flex flex-wrap items-center justify-between gap-3">
-            <span className="text-xs text-dark-muted font-medium">Quick Content Shortcuts:</span>
+            <span className="text-xs text-dark-muted font-medium">
+              Quick Content Shortcuts:
+            </span>
             <div className="flex items-center gap-2 flex-wrap">
               <Link to={ROUTES.NOTES}>
                 <button className="px-3 py-1 text-xs rounded-xl bg-background-elevated hover:bg-lavender-500/20 text-white border border-dark-border hover:border-lavender-500/40 transition-all">

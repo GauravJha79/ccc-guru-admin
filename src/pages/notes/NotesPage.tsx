@@ -9,6 +9,7 @@ import {
   Link as LinkIcon,
   Image as ImageIcon,
   X,
+  GripVertical,
 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { Note, NoteCategory } from '../../types/database';
@@ -59,6 +60,7 @@ export const NotesPage: React.FC = () => {
   const [fileName, setFileName] = useState('');
   const [fileSize, setFileSize] = useState(0);
   const [pageCount, setPageCount] = useState(1);
+  const [sortOrder, setSortOrder] = useState(1);
   const [isFeatured, setIsFeatured] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
@@ -98,6 +100,9 @@ export const NotesPage: React.FC = () => {
     setFileName('');
     setFileSize(0);
     setPageCount(10);
+    const nextOrder =
+      notes.length > 0 ? Math.max(...notes.map((n) => n.sort_order || 0)) + 1 : 1;
+    setSortOrder(nextOrder);
     setIsFeatured(false);
     setIsActive(true);
     setFormErrors({});
@@ -116,6 +121,7 @@ export const NotesPage: React.FC = () => {
     setFileName(note.file_name);
     setFileSize(note.file_size);
     setPageCount(note.page_count);
+    setSortOrder(note.sort_order ?? 1);
     setIsFeatured(note.is_featured);
     setIsActive(note.is_active);
     setFormErrors({});
@@ -147,6 +153,7 @@ export const NotesPage: React.FC = () => {
         file_name: fileName || `${title.toLowerCase().replace(/\s+/g, '-')}.pdf`,
         file_size: Number(fileSize),
         page_count: Number(pageCount),
+        sort_order: Number(sortOrder) || 0,
         is_featured: isFeatured,
         is_active: isActive,
       };
@@ -181,20 +188,52 @@ export const NotesPage: React.FC = () => {
     }
   };
 
-  const filteredNotes = notes.filter((n) => {
-    const query = searchQuery.toLowerCase();
-    const matchSearch =
-      n.title.toLowerCase().includes(query) ||
-      n.hindi_title.toLowerCase().includes(query) ||
-      n.file_name.toLowerCase().includes(query);
-    const matchCategory = categoryFilter === '' ? true : n.category_id === categoryFilter;
-    const matchFeatured =
-      featuredFilter === '' ? true : featuredFilter === 'featured' ? n.is_featured : !n.is_featured;
-    const matchStatus =
-      statusFilter === '' ? true : statusFilter === 'active' ? n.is_active : !n.is_active;
+  const handleReorder = async (reorderedPageItems: Note[]) => {
+    // 1. Calculate new sequential order for the visible page items
+    const baseOrder = (currentPage - 1) * pageSize;
+    const updatedVisible = reorderedPageItems.map((item, idx) => ({
+      ...item,
+      sort_order: baseOrder + idx + 1,
+    }));
 
-    return matchSearch && matchCategory && matchFeatured && matchStatus;
-  });
+    // 2. Optimistic update of local state
+    const orderMap = new Map(updatedVisible.map((n) => [n.id, n.sort_order]));
+    setNotes((prevNotes) =>
+      prevNotes
+        .map((n) => (orderMap.has(n.id) ? { ...n, sort_order: orderMap.get(n.id)! } : n))
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    );
+
+    // 3. Persist to Supabase
+    try {
+      const updates = updatedVisible.map((n) => ({
+        id: n.id,
+        sort_order: n.sort_order,
+      }));
+      await noteService.reorderNotes(updates);
+      success('Order Saved', 'Notes reordered successfully.');
+    } catch (err: any) {
+      toastError('Reorder Failed', err.message || 'Could not save new order.');
+      fetchData(); // Rollback on error
+    }
+  };
+
+  const filteredNotes = notes
+    .filter((n) => {
+      const query = searchQuery.toLowerCase();
+      const matchSearch =
+        n.title.toLowerCase().includes(query) ||
+        n.hindi_title.toLowerCase().includes(query) ||
+        n.file_name.toLowerCase().includes(query);
+      const matchCategory = categoryFilter === '' ? true : n.category_id === categoryFilter;
+      const matchFeatured =
+        featuredFilter === '' ? true : featuredFilter === 'featured' ? n.is_featured : !n.is_featured;
+      const matchStatus =
+        statusFilter === '' ? true : statusFilter === 'active' ? n.is_active : !n.is_active;
+
+      return matchSearch && matchCategory && matchFeatured && matchStatus;
+    })
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
 
   const totalPages = Math.ceil(filteredNotes.length / pageSize);
   const paginatedNotes = filteredNotes.slice(
@@ -203,6 +242,17 @@ export const NotesPage: React.FC = () => {
   );
 
   const columns: Column<Note>[] = [
+    {
+      key: 'sort_order',
+      header: 'Order',
+      width: '80px',
+      align: 'center',
+      render: (item) => (
+        <span className="font-mono text-xs text-lavender-300 font-bold px-2 py-1 bg-lavender-500/10 rounded-lg border border-lavender-500/20">
+          #{item.sort_order ?? 0}
+        </span>
+      ),
+    },
     {
       key: 'title',
       header: 'PDF Note & Category',
@@ -343,13 +393,23 @@ export const NotesPage: React.FC = () => {
         }}
       />
 
-      <div className="space-y-0">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs text-dark-muted px-1">
+          <span className="flex items-center gap-1.5">
+            <GripVertical className="w-3.5 h-3.5 text-lavender-400" />
+            Drag & drop table rows to change note sequence for the mobile app
+          </span>
+          <span>{filteredNotes.length} Total Notes</span>
+        </div>
+
         <DataTable
           columns={columns}
           data={paginatedNotes}
           keyExtractor={(item) => item.id}
           isLoading={loading}
-          emptyTitle="No PDF notes found in Supabase"
+          isReorderable={true}
+          onReorder={handleReorder}
+          emptyTitle="No PDF notes found"
           emptyDescription="Upload PDF notes, cheat sheets and syllabus summaries for mobile students."
           emptyActionText="Upload PDF Note"
           onEmptyAction={openCreateModal}
@@ -369,7 +429,7 @@ export const NotesPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         size="xl"
         title={editingNote ? 'Edit PDF Note' : 'Upload PDF Note & Handout'}
-        subtitle="Stores PDF documents and cover thumbnails in Supabase Storage"
+        subtitle="Uploads PDF documents and cover thumbnails directly to Hygraph Assets"
         footer={
           <>
             <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
@@ -382,7 +442,7 @@ export const NotesPage: React.FC = () => {
         }
       >
         <form onSubmit={handleSave} className="space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Select
               label="Note Category"
               value={categoryId}
@@ -390,6 +450,14 @@ export const NotesPage: React.FC = () => {
               options={noteCategories.map((c) => ({ value: c.id, label: c.title }))}
               error={formErrors.categoryId}
               required
+            />
+            <Input
+              label="Sort Order"
+              type="number"
+              min={0}
+              value={sortOrder}
+              onChange={(e) => setSortOrder(Number(e.target.value))}
+              helperText="Position in mobile app"
             />
             <Input
               label="Page Count"
@@ -478,9 +546,10 @@ export const NotesPage: React.FC = () => {
 
               {pdfInputMode === 'upload' && (
                 <FileUpload
-                  bucket={APP_CONFIG.STORAGE_BUCKETS.NOTES_PDF}
+                  provider="hygraph"
                   type="pdf"
                   accept="application/pdf"
+                  maxSizeBytes={50 * 1024 * 1024}
                   value={pdfUrl}
                   currentFileName={fileName}
                   onChange={(url, meta) => {
@@ -490,7 +559,7 @@ export const NotesPage: React.FC = () => {
                       setFileSize(meta.fileSize);
                     }
                   }}
-                  helperText={formErrors.pdfUrl ? formErrors.pdfUrl : 'Upload study PDF to Supabase Storage.'}
+                  helperText={formErrors.pdfUrl ? formErrors.pdfUrl : 'Upload study PDF document directly to Hygraph Assets.'}
                 />
               )}
 
@@ -605,12 +674,12 @@ export const NotesPage: React.FC = () => {
 
               {thumbnailInputMode === 'upload' && (
                 <FileUpload
-                  bucket={APP_CONFIG.STORAGE_BUCKETS.NOTES_THUMBNAILS}
+                  provider="hygraph"
                   type="image"
                   accept="image/*"
                   value={thumbnailUrl}
                   onChange={(url) => setThumbnailUrl(url)}
-                  helperText="Upload image preview to Supabase Storage."
+                  helperText="Upload image preview directly to Hygraph Assets."
                 />
               )}
 
@@ -689,7 +758,7 @@ export const NotesPage: React.FC = () => {
         onConfirm={handleConfirmDelete}
         isLoading={isDeleting}
         title="Delete PDF Note"
-        message={`Are you sure you want to delete "${deleteTarget?.title}" from Supabase?`}
+        message={`Are you sure you want to delete "${deleteTarget?.title}"?`}
       />
     </div>
   );

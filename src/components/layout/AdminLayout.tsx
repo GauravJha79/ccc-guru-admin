@@ -93,14 +93,14 @@ export const AdminLayout: React.FC = () => {
           subtitle: "Update account details & security",
         };
       default:
-        return { title: "CCC Prep Admin", subtitle: "Management Console" };
+        return { title: "CCCGuru Admin", subtitle: "Management Console" };
     }
   };
 
   const isEditorRoute =
     location.pathname === ROUTES.BLOG_CREATE ||
-    location.pathname.startsWith('/blogs/create') ||
-    location.pathname.startsWith('/blogs/edit');
+    location.pathname.startsWith("/blogs/create") ||
+    location.pathname.startsWith("/blogs/edit");
 
   const pageInfo = isEditorRoute
     ? {

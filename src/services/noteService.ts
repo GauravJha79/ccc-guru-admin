@@ -40,7 +40,11 @@ export const noteService = {
   // Notes
   async getNotes(): Promise<Note[]> {
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('notes').select('*, category:note_categories(*)').order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('notes')
+        .select('*, category:note_categories(*)')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false });
       if (error) throw error;
       return data || [];
     }
@@ -69,6 +73,20 @@ export const noteService = {
     if (isSupabaseConfigured && supabase) {
       const { error } = await supabase.from('notes').delete().eq('id', id);
       if (error) throw error;
+    }
+  },
+
+  async reorderNotes(items: { id: string; sort_order: number }[]): Promise<void> {
+    if (isSupabaseConfigured && supabase) {
+      const client = supabase;
+      await Promise.all(
+        items.map((item) =>
+          client
+            .from('notes')
+            .update({ sort_order: item.sort_order })
+            .eq('id', item.id)
+        )
+      );
     }
   },
 };

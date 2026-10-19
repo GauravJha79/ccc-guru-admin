@@ -114,12 +114,12 @@ export const Sidebar: React.FC<{ onCloseMobile?: () => void }> = ({
       title: "Content Library",
       items: [
         {
-          label: "PDF Notes Categories",
+          label: "Notes Categories",
           path: ROUTES.NOTE_CATEGORIES,
           icon: <FolderTree className="w-4 h-4" />,
         },
         {
-          label: "PDF Notes",
+          label: "Notes",
           path: ROUTES.NOTES,
           icon: <FileText className="w-4 h-4" />,
         },
@@ -189,7 +189,7 @@ export const Sidebar: React.FC<{ onCloseMobile?: () => void }> = ({
             </div>
             <div>
               <h1 className="font-extrabold text-base tracking-tight text-white flex items-center gap-1.5">
-                CCC Prep{" "}
+                CCCGuru{" "}
                 <span className="text-[10px] text-lavender-300 font-bold px-1.5 py-0.5 bg-lavender-500/20 rounded-md">
                   ADMIN
                 </span>
@@ -222,7 +222,7 @@ export const Sidebar: React.FC<{ onCloseMobile?: () => void }> = ({
                 if (item.superAdminOnly && !isSuperAdmin) return null;
                 const isActive =
                   location.pathname === item.path ||
-                  (item.path !== '/' &&
+                  (item.path !== "/" &&
                     item.path !== ROUTES.DASHBOARD &&
                     location.pathname.startsWith(item.path));
 

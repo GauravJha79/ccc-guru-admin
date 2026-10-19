@@ -142,6 +142,7 @@ export interface Note {
   page_count: number;
   is_featured: boolean;
   is_active: boolean;
+  sort_order: number;
   created_at: string;
   // Joins
   category?: NoteCategory;

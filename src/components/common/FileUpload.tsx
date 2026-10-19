@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Upload, FileText, Image as ImageIcon, CheckCircle, X, Loader2 } from 'lucide-react';
 import { uploadFileToSupabase } from '../../lib/storage';
+import { uploadAssetToHygraph } from '../../services/hygraphAssetService';
 import { formatFileSize, cn } from '../../lib/utils';
 import { useToast } from '../../contexts/ToastContext';
 
 export interface FileUploadProps {
-  bucket: string;
+  provider?: 'supabase' | 'hygraph';
+  bucket?: string;
   folderPath?: string;
   accept?: string;
   maxSizeBytes?: number;
@@ -18,6 +20,7 @@ export interface FileUploadProps {
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
+  provider = 'supabase',
   bucket,
   folderPath = 'uploads',
   accept = 'application/pdf,image/*',
@@ -44,11 +47,19 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
     setIsUploading(true);
     try {
-      const result = await uploadFileToSupabase(bucket, folderPath, file);
-      setFileName(result.fileName);
-      setFileSize(result.fileSize);
-      onChange(result.url, { fileName: result.fileName, fileSize: result.fileSize });
-      toastSuccess('Upload Complete', `${file.name} uploaded successfully.`);
+      if (provider === 'hygraph') {
+        const result = await uploadAssetToHygraph(file);
+        setFileName(file.name);
+        setFileSize(file.size);
+        onChange(result.url, { fileName: file.name, fileSize: file.size });
+        toastSuccess('Upload Complete', `${file.name} uploaded to Hygraph Assets.`);
+      } else {
+        const result = await uploadFileToSupabase(bucket || 'uploads', folderPath, file);
+        setFileName(result.fileName);
+        setFileSize(result.fileSize);
+        onChange(result.url, { fileName: result.fileName, fileSize: result.fileSize });
+        toastSuccess('Upload Complete', `${file.name} uploaded successfully.`);
+      }
     } catch (err: any) {
       toastError('Upload Failed', err.message || 'Could not upload file.');
     } finally {
@@ -105,7 +116,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         {isUploading ? (
           <div className="flex flex-col items-center py-3">
             <Loader2 className="w-8 h-8 animate-spin text-lavender-400 mb-2" />
-            <p className="text-sm font-medium text-white">Uploading to Supabase Storage...</p>
+            <p className="text-sm font-medium text-white">
+              {provider === 'hygraph'
+                ? 'Uploading to Hygraph Assets...'
+                : 'Uploading to Supabase Storage...'}
+            </p>
           </div>
         ) : value ? (
           <div className="flex items-center justify-between w-full p-2 bg-background-card rounded-xl border border-dark-border">

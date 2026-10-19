@@ -137,6 +137,7 @@ CREATE TABLE IF NOT EXISTS public.notes (
     page_count INT NOT NULL DEFAULT 1,
     is_featured BOOLEAN NOT NULL DEFAULT false,
     is_active BOOLEAN NOT NULL DEFAULT true,
+    sort_order INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
