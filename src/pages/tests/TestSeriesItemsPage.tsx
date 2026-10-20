@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Clock, Award, FileQuestion } from 'lucide-react';
+import { Plus, Edit2, Trash2, Clock, Award, FileQuestion, Eye } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { TestSeriesItem, TestSeries, TestItemType, DifficultyLevel } from '../../types/database';
 import { testService } from '../../services/testService';
+import { TestItemQuestionsModal } from './TestItemQuestionsModal';
 import { DataTable, Column } from '../../components/common/DataTable';
 import { SearchFilterBar } from '../../components/common/SearchFilterBar';
 import { Pagination } from '../../components/common/Pagination';
@@ -36,6 +37,7 @@ export const TestSeriesItemsPage: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<TestSeriesItem | null>(null);
+  const [viewingQuestionsItem, setViewingQuestionsItem] = useState<TestSeriesItem | null>(null);
 
   // Form Fields
   const [seriesId, setSeriesId] = useState('');
@@ -73,6 +75,10 @@ export const TestSeriesItemsPage: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, seriesFilter, difficultyFilter, typeFilter, statusFilter]);
 
   const openCreateModal = () => {
     const defaultSeriesId = seriesFilter || testSeries[0]?.id || '';
@@ -218,16 +224,31 @@ export const TestSeriesItemsPage: React.FC = () => {
       header: 'Test Set / Title',
       render: (item) => {
         const series = testSeries.find((s) => s.id === item.series_id);
+        const assigned = item.assigned_questions_count ?? 0;
+        const target = item.question_count;
+        const isComplete = assigned >= target;
         return (
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="font-bold text-white text-sm">{item.title}</span>
               <Badge variant="neutral" size="sm">{item.test_type}</Badge>
             </div>
-            <div className="flex items-center gap-2 text-xs text-dark-muted">
+            <div className="flex items-center gap-2 text-xs text-dark-muted flex-wrap">
               <span className="text-lavender-300 font-medium">Series: {series?.title || 'Unknown'}</span>
               <span>•</span>
-              <span className="text-dark-dim font-medium">{item.question_count} Qs Target</span>
+              <span className="text-dark-dim font-medium">{target} Qs Target</span>
+              <span>•</span>
+              <span
+                className={`font-semibold px-2 py-0.5 rounded-full text-[11px] ${
+                  assigned === 0
+                    ? 'text-dark-dim bg-dark-border/40'
+                    : isComplete
+                    ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20'
+                    : 'text-amber-400 bg-amber-500/10 border border-amber-500/20'
+                }`}
+              >
+                {assigned} Assigned
+              </span>
             </div>
           </div>
         );
@@ -285,20 +306,28 @@ export const TestSeriesItemsPage: React.FC = () => {
     },
     {
       key: 'assign_questions',
-      header: 'Question Bank',
-      width: '150px',
+      header: 'Questions',
+      width: '180px',
       render: (item) => (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`${ROUTES.QUESTIONS}?testItemId=${item.id}`);
-          }}
-          leftIcon={<FileQuestion className="w-3.5 h-3.5" />}
-        >
-          Manage Qs
-        </Button>
+        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setViewingQuestionsItem(item)}
+            leftIcon={<Eye className="w-3.5 h-3.5 text-lavender-400" />}
+          >
+            View ({item.assigned_questions_count ?? 0})
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(`${ROUTES.QUESTIONS}?testItemId=${item.id}`)}
+            title="Open in Question Bank"
+            leftIcon={<FileQuestion className="w-3.5 h-3.5 text-dark-muted" />}
+          >
+            Bank
+          </Button>
+        </div>
       ),
     },
     {
@@ -529,6 +558,13 @@ export const TestSeriesItemsPage: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      <TestItemQuestionsModal
+        isOpen={Boolean(viewingQuestionsItem)}
+        onClose={() => setViewingQuestionsItem(null)}
+        testItem={viewingQuestionsItem}
+        onQuestionsUpdated={fetchData}
+      />
 
       <ConfirmDialog
         isOpen={Boolean(deleteTarget)}

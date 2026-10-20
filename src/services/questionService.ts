@@ -4,12 +4,32 @@ import { Question } from '../types/database';
 export const questionService = {
   async getQuestions(): Promise<Question[]> {
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('questions')
-        .select('*, chapter:chapters(*)')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return (data || []).map((q: any) => ({
+      const PAGE_SIZE = 1000;
+      let allQuestions: any[] = [];
+      let from = 0;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('questions')
+          .select('*, chapter:chapters(*)')
+          .order('created_at', { ascending: false })
+          .range(from, from + PAGE_SIZE - 1);
+
+        if (error) throw error;
+        if (data && data.length > 0) {
+          allQuestions = allQuestions.concat(data);
+          if (data.length < PAGE_SIZE) {
+            hasMore = false;
+          } else {
+            from += PAGE_SIZE;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+
+      return allQuestions.map((q: any) => ({
         ...q,
         test_ids: Array.isArray(q.test_ids) ? q.test_ids : [],
       }));
@@ -18,14 +38,34 @@ export const questionService = {
   },
 
   async getQuestionsByTestItem(testItemId: string): Promise<Question[]> {
-    if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase
-        .from('questions')
-        .select('*, chapter:chapters(*)')
-        .contains('test_ids', [testItemId])
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return (data || []).map((q: any) => ({
+    if (isSupabaseConfigured && supabase && testItemId) {
+      const PAGE_SIZE = 1000;
+      let allQuestions: any[] = [];
+      let from = 0;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('questions')
+          .select('*, chapter:chapters(*)')
+          .contains('test_ids', [testItemId])
+          .order('created_at', { ascending: false })
+          .range(from, from + PAGE_SIZE - 1);
+
+        if (error) throw error;
+        if (data && data.length > 0) {
+          allQuestions = allQuestions.concat(data);
+          if (data.length < PAGE_SIZE) {
+            hasMore = false;
+          } else {
+            from += PAGE_SIZE;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+
+      return allQuestions.map((q: any) => ({
         ...q,
         test_ids: Array.isArray(q.test_ids) ? q.test_ids : [],
       }));

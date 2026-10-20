@@ -112,10 +112,13 @@ export const QuestionBankPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (initialTestItemId) {
-      setTestItemFilter(initialTestItemId);
-    }
-  }, [initialTestItemId]);
+    const paramId = searchParams.get("testItemId") || "";
+    setTestItemFilter(paramId);
+  }, [searchParams]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, chapterFilter, difficultyFilter, typeFilter, testItemFilter, statusFilter]);
 
   const openCreateModal = () => {
     setEditingQuestion(null);
@@ -492,7 +495,7 @@ export const QuestionBankPage: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-dark-muted mt-0.5">
-                Showing questions assigned to this set in Supabase • Target:{" "}
+                Showing <strong className="text-lavender-300">{filteredQuestions.length}</strong> questions assigned to this set • Target:{" "}
                 {selectedTestItem.question_count} Qs
               </p>
             </div>

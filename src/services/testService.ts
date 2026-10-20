@@ -89,7 +89,43 @@ export const testService = {
         .select('*, series:test_series(*)')
         .order('sort_order', { ascending: true });
       if (error) throw error;
-      return data || [];
+
+      // Efficiently aggregate question counts for each test series item
+      const counts: Record<string, number> = {};
+      try {
+        let from = 0;
+        const PAGE_SIZE = 1000;
+        let hasMore = true;
+        while (hasMore) {
+          const { data: qData, error: qErr } = await supabase
+            .from('questions')
+            .select('test_ids')
+            .not('test_ids', 'eq', '{}')
+            .range(from, from + PAGE_SIZE - 1);
+
+          if (qErr) break;
+          if (qData && qData.length > 0) {
+            for (const row of qData) {
+              if (Array.isArray(row.test_ids)) {
+                for (const tid of row.test_ids) {
+                  counts[tid] = (counts[tid] || 0) + 1;
+                }
+              }
+            }
+            if (qData.length < PAGE_SIZE) hasMore = false;
+            else from += PAGE_SIZE;
+          } else {
+            hasMore = false;
+          }
+        }
+      } catch (err) {
+        console.warn('Could not aggregate question counts for test items:', err);
+      }
+
+      return (data || []).map((item: any) => ({
+        ...item,
+        assigned_questions_count: counts[item.id] || 0,
+      }));
     }
     return [];
   },
